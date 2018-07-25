@@ -1,0 +1,104 @@
+INFO [2018-05-10 06:39:16] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 06:39:16] _________________________________
+TRACE [2018-05-10 06:39:16] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 06:39:16] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 06:39:16]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 06:39:16] Mean number of sites used for:
+INFO [2018-05-10 06:39:16]  offsets = 388
+INFO [2018-05-10 06:39:16]  devs = 355
+INFO [2018-05-10 06:39:16] writing outputs to csv
+INFO [2018-05-10 06:39:16] all done
+INFO [2018-05-10 06:57:42] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 06:57:42] _________________________________
+TRACE [2018-05-10 06:57:42] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 06:57:43] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 06:57:43]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 06:57:43] Mean number of sites used for:
+INFO [2018-05-10 06:57:43]  offsets = 388
+INFO [2018-05-10 06:57:43]  devs = 355
+INFO [2018-05-10 06:57:43] writing outputs to csv
+INFO [2018-05-10 06:57:43] all done
+INFO [2018-05-10 06:59:02] writing to PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 06:59:02] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 06:59:02] _________________________________
+TRACE [2018-05-10 06:59:02] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 06:59:02] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 06:59:02]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 06:59:02] Mean number of sites used for:
+INFO [2018-05-10 06:59:02]  offsets = 388
+INFO [2018-05-10 06:59:02]  devs = 355
+INFO [2018-05-10 06:59:02] writing outputs to csv
+INFO [2018-05-10 06:59:02] closing PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 06:59:02] all done
+INFO [2018-05-10 07:00:23] writing to PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:00:23] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 07:00:23] _________________________________
+TRACE [2018-05-10 07:00:23] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 07:00:23] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 07:00:23]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 07:00:23] Mean number of sites used for:
+INFO [2018-05-10 07:00:23]  offsets = 388
+INFO [2018-05-10 07:00:23]  devs = 355
+INFO [2018-05-10 07:00:23] writing outputs to csv
+INFO [2018-05-10 07:00:23] closing PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:00:23] all done
+INFO [2018-05-10 07:01:07] writing to PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:01:07] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 07:01:07] _________________________________
+TRACE [2018-05-10 07:01:07] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 07:01:07] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 07:01:07]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 07:01:07] Mean number of sites used for:
+INFO [2018-05-10 07:01:07]  offsets = 388
+INFO [2018-05-10 07:01:07]  devs = 355
+INFO [2018-05-10 07:01:07] writing outputs to csv
+INFO [2018-05-10 07:01:08] closing PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:01:08] all done
+INFO [2018-05-10 07:01:56] writing to PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:01:56] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 07:01:56] _________________________________
+TRACE [2018-05-10 07:01:56] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 07:01:56] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 07:01:56]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 07:01:56] Mean number of sites used for:
+INFO [2018-05-10 07:01:56]  offsets = 388
+INFO [2018-05-10 07:01:56]  devs = 355
+INFO [2018-05-10 07:01:57] writing outputs to csv
+INFO [2018-05-10 07:01:57] closing PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:01:57] all done
+INFO [2018-05-10 07:02:37] writing to PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:02:37] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 07:02:37] _________________________________
+TRACE [2018-05-10 07:02:37] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 07:02:37] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 07:02:37]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 07:02:37] Mean number of sites used for:
+INFO [2018-05-10 07:02:37]  offsets = 388
+INFO [2018-05-10 07:02:37]  devs = 355
+INFO [2018-05-10 07:02:37] writing outputs to csv
+INFO [2018-05-10 07:02:37] closing PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:02:37] all done
+INFO [2018-05-10 07:03:06] writing to PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:03:06] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 07:03:06] _________________________________
+TRACE [2018-05-10 07:03:06] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 07:03:06] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 07:03:06]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 07:03:06] Mean number of sites used for:
+INFO [2018-05-10 07:03:06]  offsets = 388
+INFO [2018-05-10 07:03:06]  devs = 355
+INFO [2018-05-10 07:03:06] writing outputs to csv
+INFO [2018-05-10 07:03:06] closing PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:03:06] all done
+INFO [2018-05-10 07:03:34] writing to PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:03:34] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//global_params.rds
+INFO [2018-05-10 07:03:34] _________________________________
+TRACE [2018-05-10 07:03:34] reading /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//simulation_params//scenario_001_simulation_params.rds
+INFO [2018-05-10 07:03:34] Generating plot 1 (scen 1 of type: impacts)
+INFO [2018-05-10 07:03:34]  offset_action_params = (net_gains, restore)
+INFO [2018-05-10 07:03:34] Mean number of sites used for:
+INFO [2018-05-10 07:03:34]  offsets = 388
+INFO [2018-05-10 07:03:34]  devs = 355
+INFO [2018-05-10 07:03:34] writing outputs to csv
+INFO [2018-05-10 07:03:34] closing PDF /Users/E24661/offset_data/Sydney_Cumberland_Data//simulation_runs/00034//collated_outputs//impacts.pdf
+INFO [2018-05-10 07:03:34] all done

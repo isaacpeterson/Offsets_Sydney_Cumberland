@@ -21,21 +21,22 @@ initialise_user_global_params <- function(){
 }
 
 
+
+
 initialise_user_simulation_params <- function(){ 
   
   simulation_params = list()
   
   # what subset of features to use in the simulation
-  simulation_params$features_to_use_in_simulation = 1:3
-  
+  simulation_params$features_to_use_in_simulation = 1
   # The total number of layers to use in the offset calcuation (iterating from the start)
-  simulation_params$features_to_use_in_offset_calc = 1:3
+  simulation_params$features_to_use_in_offset_calc = 1
   
-  simulation_params$features_to_use_in_offset_intervention = 1:3
+  simulation_params$features_to_use_in_offset_intervention = 1
 
   # How long to run the simulaton in years
   simulation_params$time_steps = 50
-  simulation_params$intervention_num = 1000
+  simulation_params$intervention_num = 500
   
   simulation_params$intervention_vec = generate_stochastic_intervention_vec(time_steps = simulation_params$time_steps, 
                                                                             intervention_start = 1, 
@@ -56,17 +57,11 @@ initialise_user_simulation_params <- function(){
   # Exclude parcels with less than this number of pixels.
   simulation_params$site_screen_size = 2
   
-  # The mean and the standard deviation of a normal distribution from which to sample the restoration parameters from
-  simulation_params$restoration_rate = 0.02
-  
-  simulation_params$restoration_rate_std = 0.005
-  #   c('net_gains', 'restoration_gains', 'avoided_condition_decline', 'avoided_loss',
-  #     'protected_condition', 'current_condition', 'restored_condition')
   
   simulation_params$offset_action_params = list(c('net_gains', 'restore'))
   
   #use a specified offset metric in the site match calculation
-  simulation_params$use_specified_offset_metric = TRUE
+  simulation_params$use_offset_metric = FALSE
   
   # define the offset metric function
   simulation_params$offset_metric_type = 'euclidian_norm'
@@ -129,7 +124,7 @@ initialise_user_output_params <- function(){
   output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts',
   output_params$output_plot = TRUE # set to plot through 'features', 'scenarios' or 'site_sets'
   output_params$realisation_num = 'all' # 'all' or number to plot
-  output_params$write_pdf = FALSE
+  output_params$write_pdf = TRUE
   output_params$sets_to_plot = 10 # example site to plot
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
   output_params$site_impact_col_vec = c('darkgreen', 'red', 'black')
@@ -152,8 +147,8 @@ initialise_user_output_params <- function(){
   output_params$landscape_outcome_plot_lims_set = rep(list(c(0, 2e7)), 10)
   
   output_params$site_impact_plot_lims_set = rep(list(c(-5e2, 5e2)), 10)
-  output_params$program_impact_plot_lims_set = rep(list(c(-1e4, 1e4)), 10) 
-  output_params$landscape_impact_plot_lims_set = rep(list(c(-5e5, 0)), 10)
+  output_params$program_impact_plot_lims_set = rep(list(c(-1e6, 1e6)), 10) 
+  output_params$landscape_impact_plot_lims_set = rep(list(c(-1e6, 0)), 10)
   
   
   
