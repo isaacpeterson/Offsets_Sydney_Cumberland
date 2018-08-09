@@ -6,10 +6,17 @@ initialise_user_global_params <- function(){
   
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                  pattern = '.tif', all.files = FALSE, 
+                                                  pattern = 'PCT_', all.files = FALSE, 
                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                   include.dirs = FALSE, no.. = FALSE)))
-  global_params$use_simulated_data = FALSE
+  
+  global_params$planning_units_raster = paste0(global_params$simulation_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
+  
+  global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
+                                                      (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
+                                                                  pattern = 'condition_class_raster_', all.files = FALSE, 
+                                                                  full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
+                                                                  include.dirs = FALSE, no.. = FALSE)))
   
   global_params$save_output_raster = TRUE
   
@@ -30,6 +37,17 @@ initialise_user_global_params <- function(){
   
   global_params$save_simulation_outputs = TRUE
   
+  global_params$overwrite_site_characteristics = FALSE
+  
+  global_params$build_simulated_data = FALSE
+  global_params$save_simulation_outputs = TRUE
+  
+  global_params$overwrite_dev_probability_list = FALSE
+  global_params$overwrite_offset_probability_list = FALSE
+  global_params$overwrite_management_dynamics = TRUE
+  global_params$overwrite_feature_dynamics = TRUE
+  global_params$overwrite_feature_dynamics_modes = TRUE
+  global_params$overwrite_site_features = TRUE
 
   
   return(global_params)
@@ -84,7 +102,7 @@ initialise_user_simulation_params <- function(){
   simulation_params$limit_offset_restoration = TRUE
   
   # The probability per parcel of it being unregulatedly cleared, every parcel gets set to this number - set to zero to turn off
-  simulation_params$unregulated_loss_prob = 0.01
+  simulation_params$unregulated_loss_prob = 0.001
   
   # Exclude parcels with less than this number of pixels.
   simulation_params$site_screen_size = 5
@@ -209,23 +227,6 @@ initialise_user_feature_params <- function(){
   #how many feature layers to generate
   feature_params$simulated_feature_num = 5
   
-  # Number of pixels in (y, x) for the feature layes 
-  feature_params$landscape_size = c(3000, 2500)
-  
-  # Numnber of parcels in x (but total size varies)
-  feature_params$parcel_num_x = 100
-  
-  # Numnber of parcels in y (but total size varies)
-  feature_params$parcel_num_y = 100
-  
-  #how much the site dimensions should vary
-  
-  feature_params$site_width_variation_param = 5
-  
-  feature_params$occupation_ratio = rep(list(1), feature_params$simulated_feature_num) 
-  
-  feature_params$simulated_time_vec = 0:200
-  
   feature_params$simulated_time_vec = 0:80
 #   full_dynamics_set = lapply(seq_along(current_author_splines),  
 #                              function(i) lapply(seq_along(current_author_splines[[i]]), 
@@ -311,7 +312,7 @@ initialise_user_output_params <- function(){
   output_params$output_plot_folder = vector()
   output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts' or 'none'
   output_params$realisation_num = 'all' # 'all' or number to plot
-  output_params$write_pdf = FALSE
+  output_params$write_pdf = TRUE
   
   output_params$plot_site = TRUE
   output_params$plot_program = TRUE
