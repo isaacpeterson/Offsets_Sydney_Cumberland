@@ -3,7 +3,7 @@ initialise_user_global_params <- function(){
   global_params = list()
   
   global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  
+  #
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
                                                   pattern = 'PCT_', all.files = FALSE, 
@@ -46,7 +46,7 @@ initialise_user_global_params <- function(){
   global_params$overwrite_offset_probability_list = FALSE
   global_params$overwrite_management_dynamics = TRUE
   global_params$overwrite_feature_dynamics = TRUE
-  global_params$overwrite_feature_dynamics_modes = TRUE
+  global_params$overwrite_condition_classes = TRUE
   global_params$overwrite_site_features = TRUE
 
   
@@ -110,7 +110,7 @@ initialise_user_simulation_params <- function(){
   simulation_params$intervention_num = 500
   
   # when the interventions are set to take place, in this case force to occur once per year
-  simulation_params$intervention_vec = generate_stochastic_intervention_vec(time_steps = simulation_params$time_steps, 
+  simulation_params$intervention_vec = build_stochastic_intervention(time_steps = simulation_params$time_steps, 
                                                                             intervention_start = 1, 
                                                                             intervention_end = simulation_params$time_steps, 
                                                                             intervention_num = simulation_params$intervention_num, 
@@ -332,7 +332,7 @@ initialise_user_output_params <- function(){
   output_params$landscape_outcome_plot_lims_set = list(c(0, 2e5))
   output_params$nx = 3 
   output_params$ny = 6
-  output_params$site_impact_plot_lims_set = list(c(-1e3, 1e3), c(-1e3, 1e3), c(-1e3, 1e3), c(-1e4, 1e4), c(-1e4, 1e4), c(-1e4, 1e4))
+  output_params$site_impact_plot_lims_set = list(c(-1e2, 1e2), c(-1e2, 1e2), c(-1e2, 1e2), c(-5e2, 5e2), c(-5e2, 5e2), c(-5e2, 5e2))
   output_params$program_impact_plot_lims_set = list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5)) 
   output_params$landscape_impact_plot_lims_set = list(c(-1e5, 1e5), c(-1e5, 1e5), c(-1e5, 1e5), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6))
   
