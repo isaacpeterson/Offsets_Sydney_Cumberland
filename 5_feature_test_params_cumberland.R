@@ -19,7 +19,7 @@ initialise_user_global_params <- function(){
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
   global_params$save_output_raster = TRUE
-  
+  global_params$store_zeros_as_sparse = TRUE
   global_params$user_feature_params_file = 'scale_paper_params.R'  # path to file
   
   global_params$number_of_cores = 1
