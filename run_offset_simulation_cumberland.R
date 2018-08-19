@@ -1,6 +1,6 @@
 library(offsetsim)
 
-source('5_feature_test_params_cumberland.R')
+source('cumberland_params.R')
 
 user_simulation_params = initialise_user_simulation_params()
 user_global_params = initialise_user_global_params()
