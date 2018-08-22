@@ -18,7 +18,7 @@ initialise_user_global_params <- function(){
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
-  global_params$save_output_raster = TRUE
+
   global_params$store_zeros_as_sparse = TRUE
   global_params$user_feature_params_file = 'scale_paper_params.R'  # path to file
   
@@ -28,12 +28,6 @@ initialise_user_global_params <- function(){
   
   # The number of realizations to run
   global_params$realisation_num = 1
-  
-  # Makes a single pdf at the end of the simulation showing the locatons of all offsets
-  global_params$write_offset_layer = FALSE
-  
-  # Create an animation of the outputs
-  global_params$write_movie = FALSE
   
   global_params$save_simulation_outputs = TRUE
   
@@ -312,7 +306,6 @@ initialise_user_output_params <- function(){
   output_params$output_plot_folder = vector()
   output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts' or 'none'
   output_params$realisation_num = 'all' # 'all' or number to plot
-  output_params$write_pdf = TRUE
   
   output_params$plot_site = TRUE
   output_params$plot_program = TRUE
@@ -320,7 +313,12 @@ initialise_user_output_params <- function(){
   output_params$plot_offset_metric = TRUE
   
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
-  output_params$output_plot = TRUE # can be set to 'plot' or 'file'
+  output_params$write_pdf = TRUE
+  output_params$save_output_raster = TRUE
+  output_params$mov_file_type = 'png'
+  output_params$output_movie = TRUE
+  output_params$output_plot = TRUE
+  
   output_params$output_csv_file = FALSE # can be set to 'plot' or 'file'
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
   output_params$plot_subset_param = 'all' #c('maintain') # 'net_gains', 'restore', 15
