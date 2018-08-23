@@ -52,7 +52,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
 
 
 build_probability_list <- function(weight_layer, land_parcels){
-  
+  browser()
   inds_to_use = !is.na(weight_layer)
   dev_weights = lapply(seq_along(land_parcels), function(i) mean(weight_layer[land_parcels[[i]]]))
   scale_factor = sum(unlist(dev_weights))
@@ -102,6 +102,7 @@ if (file.exists(paste0(simulation_inputs_folder, 'site_characteristics.rds')) & 
   site_characteristics = define_planning_units(cadastre_array)
   saveRDS(object = site_characteristics, file = paste0(simulation_inputs_folder, 'site_characteristics.rds'))
 }
+
 
 dev_probability_list = build_probability_list(dev_msk, site_characteristics$land_parcels)
 offset_probability_list = build_probability_list(!dev_msk, site_characteristics$land_parcels)

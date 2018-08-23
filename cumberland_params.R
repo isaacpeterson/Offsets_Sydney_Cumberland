@@ -35,7 +35,7 @@ initialise_user_global_params <- function(){
   
   global_params$build_simulated_data = FALSE
   global_params$save_simulation_outputs = TRUE
-  
+  global_params$overwrite_unregulated_probability_list = FALSE
   global_params$overwrite_dev_probability_list = FALSE
   global_params$overwrite_offset_probability_list = FALSE
   global_params$overwrite_management_dynamics = TRUE
@@ -99,7 +99,8 @@ initialise_user_simulation_params <- function(){
   simulation_params$unregulated_loss_prob = 0.001
   
   # Exclude parcels with less than this number of pixels.
-  simulation_params$site_screen_size = 5
+  simulation_params$min_site_screen_size = 5
+  simulation_params$max_site_screen_size_quantile = 0.999
   
   simulation_params$intervention_num = 500
   
