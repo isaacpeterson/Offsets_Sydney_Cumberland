@@ -51,14 +51,15 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
 
 
 
-build_probability_list <- function(weight_layer, land_parcels){
-  browser()
-  inds_to_use = !is.na(weight_layer)
-  dev_weights = lapply(seq_along(land_parcels), function(i) mean(weight_layer[land_parcels[[i]]]))
-  scale_factor = sum(unlist(dev_weights))
-  dev_weights = lapply(seq_along(dev_weights), function(i) dev_weights[[i]]/scale_factor)
+build_probability_list <- function(weight_layer, land_parcels, site_indexes_to_exclude){
+
+  intervention_weights = rep(list(0), length(land_parcels))
+  sites_to_use = setdiff(seq_along(land_parcels), site_indexes_to_exclude)
+  intervention_weights[sites_to_use] = lapply(sites_to_use, function(i) mean(weight_layer[land_parcels[[i]]]))
+  scale_factor = sum(unlist(intervention_weights))
+  intervention_weights = lapply(seq_along(intervention_weights), function(i) intervention_weights[[i]]/scale_factor)
   
-  return(dev_weights)
+  return(intervention_weights)
 }
 
 
@@ -71,7 +72,7 @@ project_data_to_zone_56 <- function(shp_to_project){
 }
   
 
-source('5_feature_test_params_cumberland.R')
+source('cumberland_params.R')
 
 feature_params = initialise_user_feature_params()
 
@@ -87,28 +88,41 @@ data_attribute_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland
 simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs/')
 priority_data_filenames = c("mac_veg_rst_exprt.tif", "west_veg_rst_exprt.tif", "wilt_veg_rst_exprt.tif")
 
-feature_ID_layers = load_rasters(data_folder, c(priority_data_filenames, "cum_ID_rast1.tif"), features_to_use = 'all')
+feature_ID_layers = load_rasters(paste0(data_folder, c(priority_data_filenames, "cum_ID_rast1.tif")), features_to_use = 'all')
 feature_ID_layers = lapply(seq(dim(feature_ID_layers)[3]), function(i) raster_to_array(subset(feature_ID_layers, i)))
 
-cadastre = load_rasters(data_folder, "cad_rst_exprt.tif", features_to_use = 'all')
-cadastre_msk = load_rasters(data_folder, "cum_sub_rst_exprt.tif", features_to_use = 'all')
+cadastre = raster_to_array(load_rasters(paste0(data_folder, "cad_rst_exprt.tif"), features_to_use = 'all'))
+cadastre_msk = raster_to_array(load_rasters(paste0(data_folder, "cum_sub_rst_exprt.tif"), features_to_use = 'all'))
 priority_data_att_files = c('mac_veg_att', 'west_veg_att', 'wilton_veg_att')
-dev_msk = raster_to_array(load_rasters(data_folder, "priority_rast_exprt.tif", features_to_use = 'all')) > 0
+dev_msk = raster_to_array(load_rasters(paste0(data_folder,"priority_rast_exprt.tif"), features_to_use = 'all')) > 0
+
+# Note - the two masks dont perfectly overlap - hence enforce cadastre msk boundaries - otherwise redefine cadastre_msk in ARCGIS
+dev_msk = dev_msk * cadastre_msk
 
 if (file.exists(paste0(simulation_inputs_folder, 'site_characteristics.rds')) & (overwrite_site_characteristics == FALSE)){
   site_characteristics = readRDS(paste0(simulation_inputs_folder, 'site_characteristics.rds'))
 } else {
-  cadastre_array = raster_to_array(cadastre)
+  cadastre_array = cadastre*cadastre_msk 
   site_characteristics = define_planning_units(cadastre_array)
   saveRDS(object = site_characteristics, file = paste0(simulation_inputs_folder, 'site_characteristics.rds'))
 }
 
+#exclude site index "1" as the current setup rewrites zeros for NA vals in cadastre array, resulting in the NA's being listed as "0", and correspondingly 
+# the first site is given all of these elements
 
-dev_probability_list = build_probability_list(dev_msk, site_characteristics$land_parcels)
-offset_probability_list = build_probability_list(!dev_msk, site_characteristics$land_parcels)
+objects_to_save = list()
+
+objects_to_save$dev_probability_list = build_probability_list(dev_msk, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
+
+offset_region = (!dev_msk*cadastre_msk)
+objects_to_save$offset_probability_list = build_probability_list(offset_region, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
+
+unregulated_loss_region = cadastre_msk
+objects_to_save$unregulated_probability_list = build_probability_list(unregulated_loss_region, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
 
 
-
+save_simulation_inputs(objects_to_save, simulation_inputs_folder)
+  
 data_num = length(priority_data_att_files)
 priority_data_attributes = vector('list', data_num)
 
@@ -215,7 +229,7 @@ for (data_ind in seq_along(data_attributes)){
                                           condition_class_bounds = vector())
     
     if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
-      current_feature = current_feature*(dev_msk == 0)
+      current_feature = current_feature*(!dev_msk)
     } else {
       current_feature = current_feature*dev_msk
     }
