@@ -319,11 +319,11 @@ initialise_user_output_params <- function(){
   output_params$mov_file_type = 'png'
   output_params$output_movie = TRUE
   output_params$output_plot = TRUE
-  
+  output_params$output_mov = TRUE
   output_params$output_csv_file = FALSE # can be set to 'plot' or 'file'
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
   output_params$plot_subset_param = 'all' #c('maintain') # 'net_gains', 'restore', 15
-  output_params$features_to_plot = 1:5
+  output_params$features_to_output = 1:5
   output_params$print_dev_offset_sites = FALSE
   output_params$sets_to_plot = 1
   output_params$site_outcome_plot_lims_set = list(c(0, 1e2))
