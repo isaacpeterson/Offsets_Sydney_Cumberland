@@ -304,7 +304,7 @@ setup_sub_plots <- function(nx, ny, x_space, y_space){
 
 initialise_user_output_params <- function(){
   output_params = list()
-  output_params$output_plot_folder = vector()
+  output_params$output_folder = vector()
   output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts' or 'none'
   output_params$realisation_num = 'all' # 'all' or number to plot
   
@@ -315,11 +315,11 @@ initialise_user_output_params <- function(){
   
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
   output_params$write_pdf = TRUE
-  output_params$save_output_raster = TRUE
-  output_params$mov_file_type = 'png'
-  output_params$output_movie = TRUE
+  output_params$output_raster_layers = TRUE
+  output_params$output_image_file_type = 'png'
+  output_params$output_image_layers = TRUE
+  
   output_params$output_plot = TRUE
-  output_params$output_mov = TRUE
   output_params$output_csv_file = FALSE # can be set to 'plot' or 'file'
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
   output_params$plot_subset_param = 'all' #c('maintain') # 'net_gains', 'restore', 15
