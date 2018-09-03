@@ -9,6 +9,6 @@ user_output_params <- initialise_user_output_params()
 
 osim.run(user_global_params, user_simulation_params, user_feature_params, loglevel = 'TRACE')
 
-simulation_folder = find_current_run_folder(user_global_params$simulation_folder, integer_placeholder_width = 5)
+simulation_folder = find_current_run_folder(user_global_params$simulation_folder, file_placeholder_width = 3)
 
 osim.output(user_output_params, simulation_folder)
