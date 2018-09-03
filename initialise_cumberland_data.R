@@ -26,16 +26,18 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
       current_condition_class_modes = as.numeric(condition_class_vals[, 2][ match(current_condition_class_set[ID_ind], condition_class_vals[, 1]) ])
       
       if (feature_type == 'Condition_Class'){
+        #make the condition class layer (each polygon of veg is composed of elements with the same value)
         current_element_vals = rep(current_condition_class_modes, length(current_element_set))
       } else if (feature_type == 'Feature_Value'){
         
-        current_element_vals = simulate_site_feature_elements(feature_params$site_sample_type,
-                                                              current_condition_class_modes,
-                                                              condition_class_bounds,
-                                                              element_num = length(current_element_set),
-                                                              feature_params$initial_site_sd, 
-                                                              feature_params$initial_site_mean_sd,
-                                                              feature_params$unique_site_vals)
+        #Call OSIM function to sample feature values given condition class and condition class bounds
+        current_element_vals = offsetsim::simulate_site_feature_elements(feature_params$site_sample_type,
+                                                                         current_condition_class_modes,
+                                                                         condition_class_bounds,
+                                                                         element_num = length(current_element_set),
+                                                                         feature_params$initial_site_sd, 
+                                                                         feature_params$initial_site_mean_sd,
+                                                                         feature_params$unique_site_vals)
       }
       
       current_feature[current_element_set] = current_element_vals
@@ -88,13 +90,13 @@ data_attribute_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland
 simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs/')
 priority_data_filenames = c("mac_veg_rst_exprt.tif", "west_veg_rst_exprt.tif", "wilt_veg_rst_exprt.tif")
 
-feature_ID_layers = load_rasters(paste0(data_folder, c(priority_data_filenames, "cum_ID_rast1.tif")), features_to_use = 'all')
-feature_ID_layers = lapply(seq(dim(feature_ID_layers)[3]), function(i) raster_to_array(subset(feature_ID_layers, i)))
+feature_ID_layers = offsetsim::load_rasters(paste0(data_folder, c(priority_data_filenames, "cum_ID_rast1.tif")), features_to_use = 'all')
+feature_ID_layers = lapply(seq(dim(feature_ID_layers)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_layers, i)))
 
-cadastre = raster_to_array(load_rasters(paste0(data_folder, "cad_rst_exprt.tif"), features_to_use = 'all'))
-cadastre_msk = raster_to_array(load_rasters(paste0(data_folder, "cum_sub_rst_exprt.tif"), features_to_use = 'all'))
+cadastre = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder, "cad_rst_exprt.tif"), features_to_use = 'all'))
+cadastre_msk = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder, "cum_sub_rst_exprt.tif"), features_to_use = 'all'))
 priority_data_att_files = c('mac_veg_att', 'west_veg_att', 'wilton_veg_att')
-dev_msk = raster_to_array(load_rasters(paste0(data_folder,"priority_rast_exprt.tif"), features_to_use = 'all')) > 0
+dev_msk = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder,"priority_rast_exprt.tif"), features_to_use = 'all')) > 0
 
 # Note - the two masks dont perfectly overlap - hence enforce cadastre msk boundaries - otherwise redefine cadastre_msk in ARCGIS
 dev_msk = dev_msk * cadastre_msk
@@ -126,6 +128,8 @@ save_simulation_inputs(objects_to_save, simulation_inputs_folder)
 data_num = length(priority_data_att_files)
 priority_data_attributes = vector('list', data_num)
 
+
+# read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
 for (data_ind in seq(data_num)){
   current_veg = priority_data_att_files[data_ind]
   priority_data_attributes[[data_ind]] = read.xls(paste0(data_attribute_folder, priority_data_att_files[data_ind], '.xls'))
@@ -135,9 +139,14 @@ for (data_ind in seq(data_num)){
 priority_condition_att = lapply(seq_along(priority_data_attributes), function(i) priority_data_attributes[[i]][match(c('PCT', 'Condition', 'Shape_Area'), names(priority_data_attributes[[i]]))])
 priority_condition_set = do.call("rbind", priority_condition_att)
 
+# attribute file that contains polygon information on cumberland region 
 cumberland_att = read.xls(paste0(data_attribute_folder, 'cum_veg_att.xls'))
 
+#THIS is how the parcel size sampling is done
+# Specify area size classes for sampling condiution by changing this vector
+
 area_cuts_to_use = c(seq(0, 1e5, by = 1e4), Inf)
+
 labels_to_use = seq(length(area_cuts_to_use) - 1)
 
 PCT_to_use = 849 #unique(priority_condition_set$PCT)
@@ -202,6 +211,7 @@ for (site_ind in seq(length(cumberland_att$Shape_Area))){
     current_priority_stats = full_priority_cut_stats[[cumberland_cuts[site_ind]]]
   }
   
+  #SAMPLING TO ASSIGN CONDITION CLASSES
   current_cond_inds = sample(x = seq_along(current_priority_stats$Freq), size = 1, prob = current_priority_stats$Freq/sum(current_priority_stats$Freq), replace = TRUE)
   cumberland_conditions[site_ind] = as.character(current_priority_stats$Var1[as.numeric(current_cond_inds)])
 }

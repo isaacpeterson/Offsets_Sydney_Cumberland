@@ -184,7 +184,7 @@ user_transform_function <- function(pool_vals, transform_params){
 
 initialise_user_feature_params <- function(){
   
-  # Construct the static initial landscape 
+
   current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds')
   
   feature_params = list()
@@ -228,6 +228,8 @@ initialise_user_feature_params <- function(){
 #                                                 function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
 #                                                                    function(k) predict(current_author_splines[[i]][[j]][[k]], 
 #                                                                                        feature_params$simulated_time_vec)$y)))
+  
+  # map splines to current time_vec
   
   full_dynamics_set = lapply(seq_along(current_author_splines),  
                              function(i) lapply(seq_along(current_author_splines[[i]]), 
