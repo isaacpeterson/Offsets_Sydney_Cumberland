@@ -105,7 +105,7 @@ if (file.exists(paste0(simulation_inputs_folder, 'site_characteristics.rds')) & 
   site_characteristics = readRDS(paste0(simulation_inputs_folder, 'site_characteristics.rds'))
 } else {
   cadastre_array = cadastre*cadastre_msk 
-  site_characteristics = define_planning_units(cadastre_array)
+  site_characteristics = build_site_characteristics(cadastre_array)
   saveRDS(object = site_characteristics, file = paste0(simulation_inputs_folder, 'site_characteristics.rds'))
 }
 
