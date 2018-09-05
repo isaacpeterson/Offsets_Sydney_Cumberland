@@ -317,12 +317,7 @@ initialise_user_output_params <- function(){
   
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
   output_params$write_pdf = TRUE
-  output_params$output_raster_layers = TRUE
-  output_params$output_image_file_type = 'png'
-  output_params$output_image_layers = TRUE
-  
-  output_params$output_plot = TRUE
-  output_params$output_csv_file = FALSE # can be set to 'plot' or 'file'
+  output_params$output_type = 'raster'
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
   output_params$plot_subset_param = 'all' #c('maintain') # 'net_gains', 'restore', 15
   output_params$features_to_output = 1:5
