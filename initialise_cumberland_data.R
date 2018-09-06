@@ -258,6 +258,9 @@ for (PCT_ind in seq_along(PCT_to_use)){
 }
 
 
+# write out the condition class rasters that are used by the simulation to split features per condition class per site
+# if these are not supplied the simulation will assign the condition classes internally - which is a problem for this project
+
 for (PCT_ind in seq_along(PCT_to_use)){
   current_feature_raster = raster(merged_condition_classes[[PCT_ind]])
   current_file_name = paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_condition_class_layer.tif')
@@ -265,34 +268,7 @@ for (PCT_ind in seq_along(PCT_to_use)){
   print(current_file_name) 
 }
 
-mode_selection_type = 'feature_layer'
 
-for (PCT_ind in seq_along(PCT_to_use)){
-  
-  current_site_condition_class_modes = vector('list', length(site_characteristics$land_parcels))
-  for (site_ind in seq_along(site_characteristics$land_parcels)){
-    
-    current_vals = merged_condition_classes[[PCT_ind]][site_characteristics$land_parcels[[site_ind]]]
-    
-    if (mode_selection_type == 'feature_layer'){
-      current_site_condition_class_modes[[site_ind]] = rep(list(current_vals), feature_num)
-    } else {
-      current_vals = current_vals[current_vals > 0]
-      if (length(current_vals) > 0){
-        if (mode_selection_type == 'most_common_modes'){
-          current_site_condition_class_modes[[site_ind]] = rep(list(as.numeric(tail(names(sort(table(current_vals), decreasing = TRUE )[1])))), feature_num)
-        } else if (mode_selection_type == 'unique_modes'){
-          current_site_condition_class_modes[[site_ind]] = rep(list(unique(as.vector(current_vals))), feature_num)
-        }
-      } else {
-        current_site_condition_class_modes[[site_ind]] = rep(list(0), feature_num)
-      }
-    }
-  }
-  
-  saveRDS(object = current_site_condition_class_modes, paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_condition_class_object.rds'))
-  
-}
 
 
 condition_vals_set = lapply(seq_along(data_attributes), 
@@ -351,7 +327,34 @@ for (PCT_ind in seq_along(PCT_to_use)){
 
 
 
-
+# mode_selection_type = 'feature_layer'
+# 
+# for (PCT_ind in seq_along(PCT_to_use)){
+#   
+#   current_site_condition_class_modes = vector('list', length(site_characteristics$land_parcels))
+#   for (site_ind in seq_along(site_characteristics$land_parcels)){
+#     
+#     current_vals = merged_condition_classes[[PCT_ind]][site_characteristics$land_parcels[[site_ind]]]
+#     
+#     if (mode_selection_type == 'feature_layer'){
+#       current_site_condition_class_modes[[site_ind]] = rep(list(current_vals), feature_num)
+#     } else {
+#       current_vals = current_vals[current_vals > 0]
+#       if (length(current_vals) > 0){
+#         if (mode_selection_type == 'most_common_modes'){
+#           current_site_condition_class_modes[[site_ind]] = rep(list(as.numeric(tail(names(sort(table(current_vals), decreasing = TRUE )[1])))), feature_num)
+#         } else if (mode_selection_type == 'unique_modes'){
+#           current_site_condition_class_modes[[site_ind]] = rep(list(unique(as.vector(current_vals))), feature_num)
+#         }
+#       } else {
+#         current_site_condition_class_modes[[site_ind]] = rep(list(0), feature_num)
+#       }
+#     }
+#   }
+#   
+#   saveRDS(object = current_site_condition_class_modes, paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_condition_class_object.rds'))
+#   
+# }
 
 
 
