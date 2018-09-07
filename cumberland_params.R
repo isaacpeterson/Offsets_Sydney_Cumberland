@@ -6,7 +6,7 @@ initialise_user_global_params <- function(){
   #
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                  pattern = 'feature_', all.files = FALSE, 
+                                                  pattern = 'PCT_849_feature_', all.files = FALSE, 
                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                   include.dirs = FALSE, no.. = FALSE)))
   
@@ -14,7 +14,7 @@ initialise_user_global_params <- function(){
   
   global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                                       (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                                  pattern = 'condition_class_', all.files = FALSE, 
+                                                                  pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
@@ -36,12 +36,12 @@ initialise_user_global_params <- function(){
   global_params$overwrite_unregulated_probability_list = FALSE
   global_params$overwrite_dev_probability_list = FALSE
   global_params$overwrite_offset_probability_list = FALSE
+  
   global_params$overwrite_management_dynamics = TRUE
   global_params$overwrite_feature_dynamics = TRUE
   global_params$overwrite_condition_classes = TRUE
   global_params$overwrite_site_features = TRUE
 
-  
   return(global_params)
 }
 
