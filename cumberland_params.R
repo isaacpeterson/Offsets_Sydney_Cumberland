@@ -2,13 +2,12 @@ initialise_user_global_params <- function(){
   
   global_params = list()
   
-  # global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
-
+   global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
 
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                  pattern = '_feature_', all.files = FALSE, 
+                                                  pattern = 'PCT_849_feature_', all.files = FALSE, 
                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                   include.dirs = FALSE, no.. = FALSE)))
 
@@ -16,7 +15,7 @@ initialise_user_global_params <- function(){
   
   global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                                       (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                                  pattern = 'condition_class_', all.files = FALSE, 
+                                                                  pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
 
@@ -32,6 +31,7 @@ initialise_user_global_params <- function(){
   
   global_params$overwrite_site_characteristics = FALSE
   
+  global_params$overwrite_site_condition_class_key = TRUE
   global_params$run_from_simulated_data = FALSE
   global_params$save_simulation_outputs = TRUE
   global_params$overwrite_unregulated_probability_list = FALSE
@@ -43,17 +43,18 @@ initialise_user_global_params <- function(){
   global_params$overwrite_dev_probability_list = FALSE
   global_params$overwrite_offset_probability_list = FALSE
 
+
   # If building all inputs from scratch via the initialise_cumberland_data.R,
   # then these need to be set to TRUE for the first run, to generate the
   # appropriate R objects. For subsequent runs they can be set to FALSE to
   # save time. However it's not problem if they are left as TRUE, the run will
   # just take a bit longer to get started.
+
   global_params$overwrite_management_dynamics = TRUE
   global_params$overwrite_feature_dynamics = TRUE
   global_params$overwrite_condition_classes = TRUE
   global_params$overwrite_site_features = TRUE
 
-  
   return(global_params)
 }
 
