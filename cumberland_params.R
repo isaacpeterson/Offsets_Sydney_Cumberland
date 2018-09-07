@@ -31,6 +31,7 @@ initialise_user_global_params <- function(){
   
   global_params$overwrite_site_characteristics = FALSE
   
+  global_params$overwrite_site_condition_class_key = TRUE
   global_params$run_from_simulated_data = FALSE
   global_params$save_simulation_outputs = TRUE
   global_params$overwrite_unregulated_probability_list = FALSE
