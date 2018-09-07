@@ -8,7 +8,7 @@ initialise_user_global_params <- function(){
 
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                  pattern = 'feature_', all.files = FALSE, 
+                                                  pattern = '_feature_', all.files = FALSE, 
                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                   include.dirs = FALSE, no.. = FALSE)))
 
@@ -48,10 +48,10 @@ initialise_user_global_params <- function(){
   # appropriate R objects. For subsequent runs they can be set to FALSE to
   # save time. However it's not problem if they are left as TRUE, the run will
   # just take a bit longer to get started.
-  global_params$overwrite_management_dynamics = FALSE
-  global_params$overwrite_feature_dynamics = FALSE
-  global_params$overwrite_condition_classes = FALSE
-  global_params$overwrite_site_features = FALSE
+  global_params$overwrite_management_dynamics = TRUE
+  global_params$overwrite_feature_dynamics = TRUE
+  global_params$overwrite_condition_classes = TRUE
+  global_params$overwrite_site_features = TRUE
 
   
   return(global_params)
