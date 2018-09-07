@@ -6,7 +6,7 @@ initialise_user_global_params <- function(){
   #
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                  pattern = 'PCT_', all.files = FALSE, 
+                                                  pattern = 'feature_', all.files = FALSE, 
                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                   include.dirs = FALSE, no.. = FALSE)))
   
@@ -14,7 +14,7 @@ initialise_user_global_params <- function(){
   
   global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                                       (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                                  pattern = 'condition_class_raster_', all.files = FALSE, 
+                                                                  pattern = 'condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
@@ -23,8 +23,6 @@ initialise_user_global_params <- function(){
   global_params$user_feature_params_file = 'scale_paper_params.R'  # path to file
   
   global_params$number_of_cores = 1
-  # Where simulation outputs will be written
-  #global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/simulated/')
   
   # The number of realizations to run
   global_params$realisation_num = 1

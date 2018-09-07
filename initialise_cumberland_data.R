@@ -263,9 +263,11 @@ for (PCT_ind in seq_along(PCT_to_use)){
 
 for (PCT_ind in seq_along(PCT_to_use)){
   current_feature_raster = raster(merged_condition_classes[[PCT_ind]])
-  current_file_name = paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_condition_class_layer.tif')
-  writeRaster(current_feature_raster, current_file_name, overwrite = TRUE)
-  print(current_file_name) 
+  for (feature_ind in seq(feature_params$simulated_feature_num)){
+    current_file_name = paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_condition_class_', 
+                               formatC(feature_ind, width = 3, format = "d", flag = "0"), '.tif')
+    writeRaster(current_feature_raster, current_file_name, overwrite = TRUE)
+  }
 }
 
 
@@ -319,7 +321,8 @@ for (PCT_ind in seq_along(PCT_to_use)){
 for (PCT_ind in seq_along(PCT_to_use)){
   for (feature_ind in seq(feature_num)){
     current_feature_raster = raster(merged_condition_vals[[PCT_ind]][[feature_ind]])
-    current_file_name = paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_feature_', feature_ind, '.tif')
+    current_file_name = paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_feature_', 
+                               formatC(feature_ind, width = 3, format = "d", flag = "0"), '.tif')
     writeRaster(current_feature_raster, current_file_name, overwrite = TRUE)
     print(current_file_name) 
   }
