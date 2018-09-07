@@ -2,14 +2,16 @@ initialise_user_global_params <- function(){
   
   global_params = list()
   
-  global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  #
+  # global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
+
+
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
                                                   pattern = 'feature_', all.files = FALSE, 
                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                   include.dirs = FALSE, no.. = FALSE)))
-  
+
   global_params$planning_units_raster = paste0(global_params$simulation_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
   
   global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
@@ -17,11 +19,10 @@ initialise_user_global_params <- function(){
                                                                   pattern = 'condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
-  
 
   global_params$store_zeros_as_sparse = TRUE
-  global_params$user_feature_params_file = 'scale_paper_params.R'  # path to file
   
+  # The number of cores to run on.
   global_params$number_of_cores = 1
   
   # The number of realizations to run
@@ -34,12 +35,23 @@ initialise_user_global_params <- function(){
   global_params$run_from_simulated_data = FALSE
   global_params$save_simulation_outputs = TRUE
   global_params$overwrite_unregulated_probability_list = FALSE
+
+  # If these are set to TRUE, then every parcel will have an equal probability
+  # of being developed and offset which you DON'T WANT if running development
+  # in the PGAs. So these should be set to FALSE for if specifying dev and
+  # offset areas in initialise_cumberland_data.R.
   global_params$overwrite_dev_probability_list = FALSE
   global_params$overwrite_offset_probability_list = FALSE
-  global_params$overwrite_management_dynamics = TRUE
-  global_params$overwrite_feature_dynamics = TRUE
-  global_params$overwrite_condition_classes = TRUE
-  global_params$overwrite_site_features = TRUE
+
+  # If building all inputs from scratch via the initialise_cumberland_data.R,
+  # then these need to be set to TRUE for the first run, to generate the
+  # appropriate R objects. For subsequent runs they can be set to FALSE to
+  # save time. However it's not problem if they are left as TRUE, the run will
+  # just take a bit longer to get started.
+  global_params$overwrite_management_dynamics = FALSE
+  global_params$overwrite_feature_dynamics = FALSE
+  global_params$overwrite_condition_classes = FALSE
+  global_params$overwrite_site_features = FALSE
 
   
   return(global_params)
@@ -70,7 +82,7 @@ initialise_user_simulation_params <- function(){
   
   simulation_params = list()
   
-  # what subset of features to use in the simulation
+  # What subset of features to use in the simulation
   simulation_params$features_to_use_in_simulation = 1:5# 1:5
   
   # The total number of layers to use in the offset calcuation (iterating from the start)
@@ -84,7 +96,7 @@ initialise_user_simulation_params <- function(){
   
   simulation_params$offset_metric_type = 'euclidean_norm'
   # How long to run the simulaton in years
-  simulation_params$time_steps = 50
+  simulation_params$time_steps = 5 # 50
   
   # The maxoimum number of parcels can be selected to offset a single development
   
@@ -98,9 +110,11 @@ initialise_user_simulation_params <- function(){
   
   # Exclude parcels with less than this number of pixels.
   simulation_params$min_site_screen_size = 5
+
   simulation_params$max_site_screen_size_quantile = 0.999
   
-  simulation_params$intervention_num = 500
+  # The number of developments 
+  simulation_params$intervention_num = 50 #500
   
   # when the interventions are set to take place, in this case force to occur once per year
   simulation_params$intervention_vec = build_stochastic_intervention(time_steps = simulation_params$time_steps, 
