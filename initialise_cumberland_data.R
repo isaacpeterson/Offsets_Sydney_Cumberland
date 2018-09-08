@@ -36,8 +36,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
                                                                          condition_class_bounds,
                                                                          element_num = length(current_element_set),
                                                                          feature_params$initial_site_sd, 
-                                                                         feature_params$initial_site_mean_sd,
-                                                                         feature_params$unique_site_vals)
+                                                                         feature_params$initial_site_mean_sd)
       }
       
       current_feature[current_element_set] = current_element_vals
