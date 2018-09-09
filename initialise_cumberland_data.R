@@ -100,6 +100,7 @@ dev_msk = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder,
 # Note - the two masks dont perfectly overlap - hence enforce cadastre msk boundaries - otherwise redefine cadastre_msk in ARCGIS
 dev_msk = dev_msk * cadastre_msk
 
+
 if (file.exists(paste0(simulation_inputs_folder, 'site_characteristics.rds')) & (overwrite_site_characteristics == FALSE)){
   site_characteristics = readRDS(paste0(simulation_inputs_folder, 'site_characteristics.rds'))
 } else {
@@ -122,7 +123,7 @@ unregulated_loss_region = cadastre_msk
 objects_to_save$unregulated_probability_list = build_probability_list(unregulated_loss_region, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
 
 
-save_simulation_inputs(objects_to_save, simulation_inputs_folder)
+save_simulation_inputs(objects_to_save, output_data_folder)
   
 data_num = length(priority_data_att_files)
 priority_data_attributes = vector('list', data_num)
