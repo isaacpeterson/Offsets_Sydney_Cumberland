@@ -9,7 +9,8 @@ library(offsetsim)
 library(gdata)
 
 
-
+# This function says: I have a data attributes table, take the data attributes table and info on
+# current_ID_array array of polygon IDs.
 build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, current_data_attributes, condition_class_vals, feature_params, condition_class_bounds){
   
   if (length(PCT_set_to_use) == 0){
@@ -20,6 +21,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
     
     current_feature = matrix(0, dim(current_ID_array)[1], dim(current_ID_array)[2])
     
+    # running through all the polygon IDs
     for (ID_ind in seq_along(current_object_ID_set)){
       
       current_element_set = which(current_ID_array %in% current_object_ID_set[ID_ind])
@@ -30,7 +32,11 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
         current_element_vals = rep(current_condition_class_modes, length(current_element_set))
       } else if (feature_type == 'Feature_Value'){
         
-        #Call OSIM function to sample feature values given condition class and condition class bounds
+        # Call OSIM function to sample feature values given condition class and condition class bounds
+
+        # Modify this condition_class_bounds is a nested list with info on the min, max and mean for each of the given conditions. 
+        # Want to alter the mean values in condition_class_bounds to be able make 
+
         current_element_vals = offsetsim::simulate_site_feature_elements(feature_params$site_sample_type,
                                                                          current_condition_class_modes,
                                                                          condition_class_bounds,
@@ -369,6 +375,8 @@ for (data_ind in seq_along(data_attributes)){
     PCT_set_to_use = which(data_attributes[[data_ind]]$PCT == PCT_to_use[PCT_ind])
 
     # Takes the data attributes table together with the polygon IDs and turns them into a matrix (to be written as a raster file later)
+    # Note, the feature_type = 'Condition_Class', specified that this function will be sampling from condition classes
+
     current_feature = build_feature_layer(feature_type = 'Condition_Class', 
                                           PCT_set_to_use, 
                                           current_ID_array = feature_ID_layers[[data_ind]], 
@@ -437,12 +445,15 @@ for (data_ind in seq_along(data_attributes)){
     
     for (feature_ind in seq(feature_params$simulated_feature_num)){
       
+      # Note, the feature_type = 'Feature_Value', means sampling actual condtion values for each pixel.
       current_feature = build_feature_layer(feature_type = 'Feature_Value', 
                                             PCT_set_to_use, 
                                             current_ID_array = feature_ID_layers[[data_ind]], 
                                             current_data_attributes = data_attributes[[data_ind]], 
                                             condition_class_vals, 
                                             feature_params, 
+
+                                            # Note these are where the condition class bounds come from 
                                             condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]])
       
       if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
