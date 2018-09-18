@@ -97,7 +97,7 @@ initialise_user_simulation_params <- function(){
   
   simulation_params$offset_metric_type = 'euclidean_norm'
   # How long to run the simulaton in years
-  simulation_params$time_steps = 5 # 50
+  simulation_params$time_steps = 50
   
   # The maxoimum number of parcels can be selected to offset a single development
   
@@ -117,7 +117,7 @@ initialise_user_simulation_params <- function(){
   # The number of developments 
   simulation_params$intervention_num = 50 #500
   
-  # when the interventions are set to take place, in this case force to occur once per year
+  # when the interventions are set to take place
   simulation_params$intervention_vec = build_stochastic_intervention(time_steps = simulation_params$time_steps, 
                                                                             intervention_start = 1, 
                                                                             intervention_end = simulation_params$time_steps, 
@@ -140,11 +140,11 @@ initialise_user_simulation_params <- function(){
   # credit is large enough. FALSE means ignore any exces credit from offset exchanges
   simulation_params$allow_developments_from_credit = TRUE
   
-  # How the development parcels are selected options are 'random' or
+  # How the development parcels are selected options are 'sampled' or
   # 'weighted'. Note tha weighted requires an additonal weighting layer. If
   # you are running on your own data you need to specify the weights file in
   # intialise_routines.R  (or put the files in simulation_inputs)
-  simulation_params$development_selection_type = 'random'  
+  simulation_params$development_selection_type = 'sampled'  
   
   # The time horizon in which the offset gains need to equal the devlopment impact
   simulation_params$offset_time_horizon = 30
@@ -198,7 +198,7 @@ user_transform_function <- function(pool_vals, transform_params){
 initialise_user_feature_params <- function(){
   
 
-  current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds')
+  current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
   
   feature_params = list()
   feature_params$scale_features = FALSE
@@ -327,20 +327,27 @@ initialise_user_output_params <- function(){
   
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
   output_params$write_pdf = TRUE
-  output_params$output_type = 'raster'
+  output_params$output_type = 'plot' # set to 'raster', 'png', 'plot', or 'csv'
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
   output_params$plot_subset_param = 'all' #c('maintain') # 'net_gains', 'restore', 15
   output_params$features_to_output = 1:5
   output_params$print_dev_offset_sites = FALSE
   output_params$sets_to_plot = 1
-  output_params$site_outcome_plot_lims_set = list(c(0, 1e2))
-  output_params$program_outcome_plot_lims_set = list(c(0e6, 1e5))
-  output_params$landscape_outcome_plot_lims_set = list(c(0, 2e5))
+  
+  # number of plot sub windows
   output_params$nx = 3 
   output_params$ny = 6
-  output_params$site_impact_plot_lims_set = list(c(-1e2, 1e2), c(-1e2, 1e2), c(-1e2, 1e2), c(-5e2, 5e2), c(-5e2, 5e2), c(-5e2, 5e2))
-  output_params$program_impact_plot_lims_set = list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5)) 
-  output_params$landscape_impact_plot_lims_set = list(c(-1e5, 1e5), c(-1e5, 1e5), c(-1e5, 1e5), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6))
+  
+  
+  #set of nested lists by scenario and feature (which in this case is 5)
+  output_params$site_outcome_plot_lims_set = list(rep(list(c(0, 1e2)), 5))
+  output_params$program_outcome_plot_lims_set = list(rep(list(c(0e6, 1e5))), 5)
+  output_params$landscape_outcome_plot_lims_set = list(rep(list(c(0, 2e5))))
+
+  #set of nested lists by scenario and feature (which in this case is 5)
+  output_params$site_impact_plot_lims_set = list(list(c(-1e2, 1e2), c(-1e2, 1e2), c(-1e2, 1e2), c(-5e2, 5e2), c(-5e2, 5e2), c(-5e2, 5e2)))
+  output_params$program_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5))) 
+  output_params$landscape_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-1e5, 1e5), c(-1e5, 1e5), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6)))
   
   return(output_params)
 }
