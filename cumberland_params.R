@@ -2,8 +2,8 @@ initialise_user_global_params <- function(){
   
   global_params = list()
   
-   global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
+  #global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
 
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
@@ -29,11 +29,16 @@ initialise_user_global_params <- function(){
   
   global_params$save_simulation_outputs = TRUE
   
+  # Builds site_characteristics object. Note for Cumberland analysis always
+  # want this to be FALSE as this is built in initialise_cumberland_data.R
   global_params$overwrite_site_characteristics = FALSE
-  
-  global_params$overwrite_site_condition_class_key = TRUE
+
+  # these two also need to be FALAE when using the cumberland data
+  global_params$overwrite_site_condition_class_key = TRUE 
   global_params$run_from_simulated_data = FALSE
+  
   global_params$save_simulation_outputs = TRUE
+
   global_params$overwrite_unregulated_probability_list = FALSE
 
   # If these are set to TRUE, then every parcel will have an equal probability
@@ -60,64 +65,61 @@ initialise_user_global_params <- function(){
 
 
 
-
-create_dynamics_set <- function(logistic_params_set, condition_class_bounds, time_vec){
-  
-  dynamics_set = lapply(seq_along(logistic_params_set), 
-                        function(i) lapply(seq_along(logistic_params_set[[i]]),
-                                           function(j) lapply(seq_along(logistic_params_set[[i]][[j]]),
-                                                              function(k) logistic_projection(parcel_vals = logistic_params_set[[i]][[j]][[k]][1], 
-                                                                                              min_eco_val = condition_class_bounds[[i]][[j]][1], 
-                                                                                              max_eco_val = condition_class_bounds[[i]][[j]][3], 
-                                                                                              current_dec_rate = logistic_params_set[[i]][[j]][[k]][2], 
-                                                                                              time_vec = time_vec))))
-  dynamics_set = lapply(seq_along(logistic_params_set), 
-                        function(i) lapply(seq_along(logistic_params_set[[i]]),
-                                           function(j) setNames(dynamics_set[[i]][[j]], c('lower_bound', 'best_estimate', 'upper_bound'))))
-  
-  return(dynamics_set)
-}
-
-
 initialise_user_simulation_params <- function(){ 
   
   simulation_params = list()
   
-  # What subset of features to use in the simulation
-  simulation_params$features_to_use_in_simulation = 1:5# 1:5
-  
-  # The total number of layers to use in the offset calcuation (iterating from the start)
-  simulation_params$features_to_use_in_offset_calc = 1:5 #1:5
-  
-  simulation_params$features_to_use_in_offset_intervention = 1:5 #1:5
-  
-  simulation_params$use_offset_metric = TRUE
-  
-  simulation_params$transform_params = c(5, 12, 15, 22, 45)
-  
-  simulation_params$offset_metric_type = 'euclidean_norm'
   # How long to run the simulaton in years
-  simulation_params$time_steps = 50
-  
-  # The maxoimum number of parcels can be selected to offset a single development
-  
-  simulation_params$max_offset_parcel_num = 10
-  
-  # Stops the offset from delivering any further gains once it has acheived the gains required
-  simulation_params$limit_offset_restoration = TRUE
-  
-  # The probability per parcel of it being unregulatedly cleared, every parcel gets set to this number - set to zero to turn off
-  simulation_params$unregulated_loss_prob = 0.001
-  
-  # Exclude parcels with less than this number of pixels.
-  simulation_params$min_site_screen_size = 5
-
-  simulation_params$max_site_screen_size_quantile = 0.999
+  simulation_params$time_steps = 5 # 50
   
   # The number of developments 
   simulation_params$intervention_num = 50 #500
   
-  # when the interventions are set to take place
+  # The probability per parcel of it being unregulatedly cleared, every parcel
+  # gets set to this number - set to zero to turn off. Be careful as this is
+  # dependant on the total number of parcels.
+  simulation_params$unregulated_loss_prob = 0.001
+
+  # What subset of features to use in the simulation
+  # Need to keep these as is to use veg integrity score
+  simulation_params$features_to_use_in_simulation = 1:5
+  
+  # The total number of layers to use in the offset calcuation (iterating from the start)
+  # Need to keep these as is to use veg integrity score
+  simulation_params$features_to_use_in_offset_calc = 1:5
+ 
+  # Speifies what is affected by the offset intervention
+  # Need to keep these as is to use veg integrity score
+  simulation_params$features_to_use_in_offset_intervention = 1:5
+  
+  # means using the BAM score via the veg integrity. If this is TRUE thenm the
+  # offset metric needs to be defined via a function called
+  # user_transform_function, which is defined below.
+  simulation_params$use_offset_metric = TRUE
+  
+  # These are the benchmark scores for tree/grass richness/cover etc that are
+  # used in the calculating the veg integrity score
+  simulation_params$transform_params = c(5, 12, 15, 22, 45)
+  
+  # The maximum number of parcels can be selected to offset a single development
+
+  simulation_params$max_offset_parcel_num = 10
+  
+  # Stops the offset from delivering any further gains once it has acheived the gains required
+  # only applied to management stopping. Still gets avoided lose gains
+  simulation_params$limit_offset_restoration = TRUE
+  
+  # Exclude parcels with less than this number of pixels.
+  simulation_params$min_site_screen_size = 5
+
+  # Temoving the very largest parcels in the top 0.1% of the size distribution.
+  simulation_params$max_site_screen_size_quantile = 0.999
+  
+
+  # Builds the vector of number of developments per year.  this can be changed
+  # to manually specify the number of developments per year. This needs to be
+  # of length number of years. 
+
   simulation_params$intervention_vec = build_stochastic_intervention(time_steps = simulation_params$time_steps, 
                                                                             intervention_start = 1, 
                                                                             intervention_end = simulation_params$time_steps, 
@@ -164,6 +166,7 @@ initialise_user_simulation_params <- function(){
   simulation_params$include_unregulated_loss_in_dev_calc = simulation_params$include_unregulated_loss_in_offset_calc
   
   simulation_params$dev_counterfactual_adjustment = 'as_offset'
+  
   # The development impacts is multiplied by this factor (irrespective of how
   # they were caluclated) and the offset impact then needs to match this
   # multiplied development impact
@@ -196,10 +199,14 @@ user_transform_function <- function(pool_vals, transform_params){
 
 
 initialise_user_feature_params <- function(){
-  
 
-  current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
-  
+  current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds') # works
+  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkeith_splines.rds') # works
+
+  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds')
+  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_pprice_splines.rds')
+  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
+
   feature_params = list()
   feature_params$scale_features = FALSE
   # how the feature dynamics are determined
