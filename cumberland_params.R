@@ -375,6 +375,9 @@ initialise_user_output_params <- function(){
   # print the number of offsets and developments to screen
   output_params$print_dev_offset_sites = FALSE
 
+  #ouput offset sites as block colors rather than site_vals
+  output_params$output_block_offsets = FALSE
+  
   # number of plot sub windows
   output_params$nx = 3 
   output_params$ny = 6
