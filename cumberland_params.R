@@ -69,6 +69,8 @@ initialise_user_simulation_params <- function(){
   
   simulation_params = list()
   
+  #set to greater than zero to allow developments without offsets
+  simulation_params$initial_credit = 0
   # How long to run the simulaton in years
   simulation_params$time_steps = 5 # 50
   
