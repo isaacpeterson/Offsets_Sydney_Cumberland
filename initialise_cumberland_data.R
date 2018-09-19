@@ -34,9 +34,20 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
         
         # Call OSIM function to sample feature values given condition class and condition class bounds
 
+        
         # Modify this condition_class_bounds is a nested list with info on the min, max and mean for each of the given conditions. 
         # Want to alter the mean values in condition_class_bounds to be able make 
-
+        
+        if (modify_means == TRUE){
+          
+          current_condition_class_bounds = lapply(seq_along(condition_class_bounds), 
+                                                  function(i) seq_along(condition_class_bounds[[i]], 
+                                                                        function(j) modify_mean(condition_class_bounds[[i]][[j]][1],
+                                                                                                condition_class_bounds[[i]][[j]][2],
+                                                                                                condition_class_bounds[[i]][[j]][3],
+                                                                                                mean_modifier = modify_means_object[[ID_ind]])))
+        } 
+        
         current_element_vals = offsetsim::simulate_site_feature_elements(feature_params$site_sample_type,
                                                                          current_condition_class_modes,
                                                                          condition_class_bounds,
@@ -53,6 +64,16 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
 }
 
 
+modify_mean <- function(lower_bound, best_estimate, upper_bound, current_mean_modifier){
+  
+  if (current_mean_modifier >= 0){
+    modified_mean = current_mean_modifier*(upper_bound - best_estimate)
+  } else {
+    modified_mean = current_mean_modifier*(lower_bound - best_estimate)
+  }
+  
+  current_condition_class_bounds = c(lower_bound, modified_mean, upper_bound)
+}
 
 
 
@@ -383,7 +404,8 @@ for (data_ind in seq_along(data_attributes)){
                                           current_data_attributes = data_attributes[[data_ind]], 
                                           condition_class_vals, 
                                           feature_params, 
-                                          condition_class_bounds = vector())
+                                          condition_class_bounds = vector(), 
+                                          modify_means = FALSE, modify_means_object = vector())
     
     # This dealing with the overlaps between the Biosis PGA veg mapping and the Cumberland west veg mapping
     # for the overlap area use the biosis values
@@ -433,6 +455,8 @@ for (PCT_ind in seq_along(PCT_to_use)){
 
 # Same issue as above about combining the PGA data with the data fro the rest of the Cumberland mapping.
 
+modify_mean = TRUE
+modify_means_object = runif(min = -1, max = 1, length(which(data_attributes[[data_ind]]$PCT == PCT_to_use)))
 
 condition_vals_set = lapply(seq_along(data_attributes), 
                             function(i) lapply(seq_along(PCT_to_use), 
@@ -454,7 +478,9 @@ for (data_ind in seq_along(data_attributes)){
                                             feature_params, 
 
                                             # Note these are where the condition class bounds come from 
-                                            condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]])
+                                            condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]], 
+                                            modify_means, 
+                                            modify_means_object)
       
       if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
         current_feature = current_feature*(PGA_msk == 0)
