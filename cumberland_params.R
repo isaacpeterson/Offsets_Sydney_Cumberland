@@ -2,8 +2,8 @@ initialise_user_global_params <- function(){
   
   global_params = list()
   
-  #global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
+  global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
 
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
@@ -239,7 +239,12 @@ initialise_user_feature_params <- function(){
   #how many feature layers to generate
   feature_params$simulated_feature_num = 5
 
+
   # The larger this value is the more extrapolating with the splines
+
+  
+  #the time over which the experts defined the curves
+
   feature_params$simulated_time_vec = 0:80
 #   full_dynamics_set = lapply(seq_along(current_author_splines),  
 #                              function(i) lapply(seq_along(current_author_splines[[i]]), 
@@ -340,6 +345,7 @@ initialise_user_output_params <- function(){
   output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts'
 
   # use 'all' for all or therwise the numern eg 6 means the first 6 realiztaions.
+
   output_params$realisation_num = 'all' # 'all' or number to plot
   
   # the dev-offset to plot for the site level results.
@@ -372,7 +378,6 @@ initialise_user_output_params <- function(){
   # number of plot sub windows
   output_params$nx = 3 
   output_params$ny = 6
-  
   
   #set of nested lists by scenario and feature (which in this case is 5)
   output_params$site_outcome_plot_lims_set = list(rep(list(c(0, 1e2)), 5))
