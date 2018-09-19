@@ -238,7 +238,8 @@ initialise_user_feature_params <- function(){
   
   #how many feature layers to generate
   feature_params$simulated_feature_num = 5
-  
+
+  # The larger this value is the more extrapolating with the splines
   feature_params$simulated_time_vec = 0:80
 #   full_dynamics_set = lapply(seq_along(current_author_splines),  
 #                              function(i) lapply(seq_along(current_author_splines[[i]]), 
@@ -246,17 +247,25 @@ initialise_user_feature_params <- function(){
 #                                                                    function(k) predict(current_author_splines[[i]][[j]][[k]], 
 #                                                                                        feature_params$simulated_time_vec)$y)))
   
-  # map splines to current time_vec
+  # full_dynamics_set is a list of vectors for each of the expert curves
+  # map splines to simulated_time_vec, first loop  
   
+  # k loop: upper bound best estimtate lower bound
+  # j loop: veg condition type (L, M1, M2, H)
+  # i look: lifeform: grass, trees etc
+
+
   full_dynamics_set = lapply(seq_along(current_author_splines),  
                              function(i) lapply(seq_along(current_author_splines[[i]]), 
                                                 function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
                                                                    function(k) current_author_splines[[i]][[j]][[k]](feature_params$simulated_time_vec))))
-  
+
+  # This is just reordering the best upper and lower bound
   full_dynamics_set = lapply(seq_along(full_dynamics_set),  
                              function(i) lapply(seq_along(full_dynamics_set[[i]]), 
                                                 function(j) full_dynamics_set[[i]][[j]][c(1, 3, 2)])) 
-  
+
+  # This is to set any value below zero back to zero (can get negative numbers from spline extrapolation)
   full_dynamics_set = lapply(seq_along(full_dynamics_set),  
                              function(i) lapply(seq_along(full_dynamics_set[[i]]), 
                                                 function(j) lapply(seq_along(full_dynamics_set[[i]][[j]]), 
@@ -323,24 +332,43 @@ setup_sub_plots <- function(nx, ny, x_space, y_space){
 
 initialise_user_output_params <- function(){
   output_params = list()
-  output_params$output_folder = vector()
-  output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts' or 'none'
+
+  # if leave it as an empty vec will put in the the collated realizations
+  # folder, otherwise you specify the path
+  output_params$output_folder = vector() 
+
+  output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts'
+
+  # use 'all' for all or therwise the numern eg 6 means the first 6 realiztaions.
   output_params$realisation_num = 'all' # 'all' or number to plot
   
+  # the dev-offset to plot for the site level results.
+  output_params$sets_to_plot = 1
+
+
   output_params$plot_site = TRUE
   output_params$plot_program = TRUE
   output_params$plot_landscape = TRUE
+
+  # if this is false won't generate plots of maps for the offset metric
   output_params$plot_offset_metric = TRUE
   
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
-  output_params$write_pdf = TRUE
-  output_params$output_type = 'plot' # set to 'raster', 'png', 'plot', or 'csv'
+
+  output_params$write_pdf = FALSE
+  output_params$output_type = 'png' # set to 'raster', 'png', 'plot', or 'csv'
+
+  # was originally done 
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
   output_params$plot_subset_param = 'all' #c('maintain') # 'net_gains', 'restore', 15
-  output_params$features_to_output = 1:5
+
+  # Set this to zero and it will only output the metric, if metric has been set to true. 
+  # need to add flag to capture this and exit is the metric has been set to false.
+  output_params$features_to_output = 0 #1:5
+
+  # print the number of offsets and developments to screen
   output_params$print_dev_offset_sites = FALSE
-  output_params$sets_to_plot = 1
-  
+
   # number of plot sub windows
   output_params$nx = 3 
   output_params$ny = 6
@@ -356,6 +384,19 @@ initialise_user_output_params <- function(){
   output_params$program_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5))) 
   output_params$landscape_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-1e5, 1e5), c(-1e5, 1e5), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6)))
   
+  # write the raw condition value to file if fase, otherwise write the rescaled values as per the colour ramps below.
+  output_params$map_vals = TRUE
+
+  # Changes these colours 
+  black_green.palette <- colorRampPalette(c("black", "green"), space = "rgb")  
+  black_blue.palette <- colorRampPalette(c("black", "blue"), space = "rgb")
+
+  # set a colour ramp the red is for dev parcels, the orange is for unregulated dev.
+  # black_green.palette(128) is for background, black_blue.palette(128) is for offsets
+  output_params$col_vec = c(black_green.palette(128), black_blue.palette(128), 'red', 'orange')
+  output_params$col_map_vector = c(128, 128, 256, 256, 257) #c(offset_col, offset_bank_col, dev_col, dev_credit_col, unregulated_loss_col)
+
+
   return(output_params)
 }
 
