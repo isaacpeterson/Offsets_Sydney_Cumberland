@@ -142,11 +142,11 @@ initialise_user_simulation_params <- function(){
   # credit is large enough. FALSE means ignore any exces credit from offset exchanges
   simulation_params$allow_developments_from_credit = TRUE
   
-  # How the development parcels are selected options are 'sampled' or
+  # How the development parcels are selected options are 'stochastic' or
   # 'weighted'. Note tha weighted requires an additonal weighting layer. If
   # you are running on your own data you need to specify the weights file in
   # intialise_routines.R  (or put the files in simulation_inputs)
-  simulation_params$development_selection_type = 'sampled'  
+  simulation_params$development_selection_type = 'stochastic'  
   
   # The time horizon in which the offset gains need to equal the devlopment impact
   simulation_params$offset_time_horizon = 30
