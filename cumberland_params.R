@@ -33,13 +33,12 @@ initialise_user_global_params <- function(){
   # want this to be FALSE as this is built in initialise_cumberland_data.R
   global_params$overwrite_site_characteristics = FALSE
 
-  # these two also need to be FALAE when using the cumberland data
-  global_params$overwrite_site_condition_class_key = TRUE 
+
   global_params$run_from_simulated_data = FALSE
   
   global_params$save_simulation_outputs = TRUE
 
-  global_params$overwrite_unregulated_probability_list = FALSE
+
 
   # If these are set to TRUE, then every parcel will have an equal probability
   # of being developed and offset which you DON'T WANT if running development
@@ -47,7 +46,9 @@ initialise_user_global_params <- function(){
   # offset areas in initialise_cumberland_data.R.
   global_params$overwrite_dev_probability_list = FALSE
   global_params$overwrite_offset_probability_list = FALSE
-
+  global_params$overwrite_unregulated_probability_list = FALSE
+  
+  global_params$overwrite_site_features = TRUE
 
   # If building all inputs from scratch via the initialise_cumberland_data.R,
   # then these need to be set to TRUE for the first run, to generate the
@@ -55,10 +56,10 @@ initialise_user_global_params <- function(){
   # save time. However it's not problem if they are left as TRUE, the run will
   # just take a bit longer to get started.
 
-  global_params$overwrite_management_dynamics = TRUE
-  global_params$overwrite_feature_dynamics = TRUE
-  global_params$overwrite_condition_classes = TRUE
-  global_params$overwrite_site_features = TRUE
+  global_params$overwrite_management_dynamics = FALSE
+  global_params$overwrite_feature_dynamics = FALSE
+  global_params$overwrite_condition_classes = FALSE
+
 
   return(global_params)
 }
@@ -173,6 +174,10 @@ initialise_user_simulation_params <- function(){
   # they were caluclated) and the offset impact then needs to match this
   # multiplied development impact
   simulation_params$offset_multiplier = 1
+  
+  # set to false to stop initial credit being transformed - this has a big impact when using the BAM metric which 
+  # transforms large values to ceiling defined by 100.68
+  simulation_params$transform_initial_credit = TRUE
   
   return(simulation_params)
   
