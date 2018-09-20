@@ -172,10 +172,11 @@ dev_msk = PGA_msk * cadastre_msk
 # Note: if I want exclude exisiting conservation areas for offsets, I would add them in here. 
 offset_region = (!dev_msk*cadastre_msk)
 
+# Currently unregulated loss can occur anywhere in the study area
 unregulated_loss_region = cadastre_msk
 
-objects_to_save = list()
 
+objects_to_save = list()
 
 # Note: all Site IDs are integers. The code above, finds all unique integes
 # and gives then an ID starting from 1. However NAs have all gone to zero

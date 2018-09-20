@@ -74,6 +74,12 @@ initialise_user_simulation_params <- function(){
   
   # The number of developments 
   simulation_params$intervention_num = 50 #500
+
+
+  # see somments in default params re this variable
+  # if set to 'unregulated_stochastic_development', will be similar to 
+  default_simulation_params$unregulated_loss_type = 'default'
+
   
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
@@ -253,8 +259,6 @@ initialise_user_feature_params <- function(){
   # k loop: upper bound best estimtate lower bound
   # j loop: veg condition type (L, M1, M2, H)
   # i look: lifeform: grass, trees etc
-
-
   full_dynamics_set = lapply(seq_along(current_author_splines),  
                              function(i) lapply(seq_along(current_author_splines[[i]]), 
                                                 function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
@@ -266,8 +270,8 @@ initialise_user_feature_params <- function(){
                                                 function(j) full_dynamics_set[[i]][[j]][c(1, 3, 2)])) 
 
   # This is to set any value below zero back to zero (can get negative numbers from spline extrapolation)
-  full_dynamics_set = lapply(seq_along(full_dynamics_set),  
-                             function(i) lapply(seq_along(full_dynamics_set[[i]]), 
+  full_dynamics_set = lapply(seq_along(full_dynamics_set),
+                             function(i) lapply(seq_along(full_dynamics_set[[i]]),
                                                 function(j) lapply(seq_along(full_dynamics_set[[i]][[j]]), 
                                                                    function(k) full_dynamics_set[[i]][[j]][[k]]*(full_dynamics_set[[i]][[j]][[k]] >= 0)))) 
   
