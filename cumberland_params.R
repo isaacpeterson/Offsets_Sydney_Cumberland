@@ -70,8 +70,8 @@ initialise_user_simulation_params <- function(){
   
   simulation_params = list()
   
-  #set to greater than zero to allow developments without offsets
-  simulation_params$initial_credit = 0
+
+  
   # How long to run the simulaton in years
   simulation_params$time_steps = 5 # 50
   
@@ -174,10 +174,14 @@ initialise_user_simulation_params <- function(){
   # they were caluclated) and the offset impact then needs to match this
   # multiplied development impact
   simulation_params$offset_multiplier = 1
+
+  #set to greater than zero to allow developments without offsets
+  simulation_params$initial_credit = 0
   
   # set to false to stop initial credit being transformed - this has a big impact when using the BAM metric which 
   # transforms large values to ceiling defined by 100.68
   simulation_params$transform_initial_credit = TRUE
+  
   
   return(simulation_params)
   
