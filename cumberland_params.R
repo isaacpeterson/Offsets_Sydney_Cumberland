@@ -2,8 +2,8 @@ initialise_user_global_params <- function(){
   
   global_params = list()
   
-  #global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
+  global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
 
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
@@ -69,6 +69,8 @@ initialise_user_simulation_params <- function(){
   
   simulation_params = list()
   
+  #set to greater than zero to allow developments without offsets
+  simulation_params$initial_credit = 0
   # How long to run the simulaton in years
   simulation_params$time_steps = 5 # 50
   
@@ -148,11 +150,11 @@ initialise_user_simulation_params <- function(){
   # credit is large enough. FALSE means ignore any exces credit from offset exchanges
   simulation_params$allow_developments_from_credit = TRUE
   
-  # How the development parcels are selected options are 'sampled' or
+  # How the development parcels are selected options are 'stochastic' or
   # 'weighted'. Note tha weighted requires an additonal weighting layer. If
   # you are running on your own data you need to specify the weights file in
   # intialise_routines.R  (or put the files in simulation_inputs)
-  simulation_params$development_selection_type = 'sampled'  
+  simulation_params$development_selection_type = 'stochastic'  
   
   # The time horizon in which the offset gains need to equal the devlopment impact
   simulation_params$offset_time_horizon = 30
@@ -245,7 +247,12 @@ initialise_user_feature_params <- function(){
   #how many feature layers to generate
   feature_params$simulated_feature_num = 5
 
+
   # The larger this value is the more extrapolating with the splines
+
+  
+  #the time over which the experts defined the curves
+
   feature_params$simulated_time_vec = 0:80
 #   full_dynamics_set = lapply(seq_along(current_author_splines),  
 #                              function(i) lapply(seq_along(current_author_splines[[i]]), 
@@ -344,6 +351,7 @@ initialise_user_output_params <- function(){
   output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts'
 
   # use 'all' for all or therwise the numern eg 6 means the first 6 realiztaions.
+
   output_params$realisation_num = 'all' # 'all' or number to plot
   
   # the dev-offset to plot for the site level results.
@@ -373,10 +381,12 @@ initialise_user_output_params <- function(){
   # print the number of offsets and developments to screen
   output_params$print_dev_offset_sites = FALSE
 
+  #ouput offset sites as block colors rather than site_vals
+  output_params$output_block_offsets = FALSE
+  
   # number of plot sub windows
   output_params$nx = 3 
   output_params$ny = 6
-  
   
   #set of nested lists by scenario and feature (which in this case is 5)
   output_params$site_outcome_plot_lims_set = list(rep(list(c(0, 1e2)), 5))

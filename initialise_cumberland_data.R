@@ -5,13 +5,18 @@ library(rgeos)
 library(maptools)
 library(abind)
 library(pixmap)
-library(offsetsim)
 library(gdata)
+library(offsetsim)
+
 
 
 # This function says: I have a data attributes table, take the data attributes table and info on
 # current_ID_array array of polygon IDs.
-build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, current_data_attributes, condition_class_vals, feature_params, condition_class_bounds){
+
+
+
+build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, current_data_attributes, 
+                                condition_class_vals, feature_params, condition_class_bounds, modify_means, means_modifier){
   
   if (length(PCT_set_to_use) == 0){
     current_feature = vector()
@@ -25,21 +30,28 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
     for (ID_ind in seq_along(current_object_ID_set)){
       
       current_element_set = which(current_ID_array %in% current_object_ID_set[ID_ind])
-      current_condition_class_modes = as.numeric(condition_class_vals[, 2][ match(current_condition_class_set[ID_ind], condition_class_vals[, 1]) ])
+      current_condition_class_mode = as.numeric(condition_class_vals[, 2][ match(current_condition_class_set[ID_ind], condition_class_vals[, 1]) ])
       
       if (feature_type == 'Condition_Class'){
         #make the condition class layer (each polygon of veg is composed of elements with the same value)
-        current_element_vals = rep(current_condition_class_modes, length(current_element_set))
+        current_element_vals = rep(current_condition_class_mode, length(current_element_set))
       } else if (feature_type == 'Feature_Value'){
         
         # Call OSIM function to sample feature values given condition class and condition class bounds
 
+        
         # Modify this condition_class_bounds is a nested list with info on the min, max and mean for each of the given conditions. 
         # Want to alter the mean values in condition_class_bounds to be able make 
-
+        
+        if (modify_means == TRUE){
+          current_condition_class_bounds = lapply(seq_along(condition_class_bounds), 
+                                                  function(i) modify_mean(condition_class_bounds[[i]],
+                                                                          means_modifier[[ID_ind]]))
+        } 
+        
         current_element_vals = offsetsim::simulate_site_feature_elements(feature_params$site_sample_type,
-                                                                         current_condition_class_modes,
-                                                                         condition_class_bounds,
+                                                                         current_condition_class_mode,
+                                                                         current_condition_class_bounds,
                                                                          element_num = length(current_element_set),
                                                                          feature_params$initial_site_sd, 
                                                                          feature_params$initial_site_mean_sd)
@@ -53,6 +65,17 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
 }
 
 
+modify_mean <- function(current_condition_class_bounds, current_mean_modifier){
+  
+  if (current_mean_modifier >= 0){
+    modified_mean = current_condition_class_bounds[2] + current_mean_modifier*(current_condition_class_bounds[3] - current_condition_class_bounds[2])
+  } else {
+    modified_mean = current_condition_class_bounds[2] + current_mean_modifier*(current_condition_class_bounds[2] - current_condition_class_bounds[1])
+  }
+  
+  current_condition_class_bounds = c(current_condition_class_bounds[1], modified_mean, current_condition_class_bounds[3])
+  
+}
 
 
 
@@ -79,8 +102,8 @@ project_data_to_zone_56 <- function(shp_to_project){
 }
   
 
-# source('cumberland_params.R')
-source('/Users/ascelin/analysis/GitHub/Offsets_Sydney_Cumberland/cumberland_params.R')
+ source('cumberland_params.R')
+#source('/Users/ascelin/analysis/GitHub/Offsets_Sydney_Cumberland/cumberland_params.R')
 
 
 # Function defined in cumberland_params.R
@@ -95,16 +118,16 @@ overwrite_site_characteristics = FALSE
 
 
 # Isaac's locations 
-# data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/cumberland_aligned_tif/')
-# output_data_folder = '/Users/E24661/offset_data/Sydney_Cumberland_Data/prepared_data/'
-# data_attribute_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/veg_attributes/')
-# simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs/')
+data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/cumberland_aligned_tif/')
+output_data_folder = '/Users/E24661/offset_data/Sydney_Cumberland_Data/prepared_data/'
+data_attribute_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/veg_attributes/')
+simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs/')
 
 # Ascelin's locations 
-data_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/cumberland_aligned_tif/')
-output_data_folder = '/Users/ascelin/analysis/offset_simulator/Sydney_Cumberland_Data/testing3/output_data_folder/'
-data_attribute_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/veg_attributes/')
-simulation_inputs_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/testing3/simulation_inputs_folder/')
+# data_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/cumberland_aligned_tif/')
+# output_data_folder = '/Users/ascelin/analysis/offset_simulator/Sydney_Cumberland_Data/testing3/output_data_folder/'
+# data_attribute_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/veg_attributes/')
+# simulation_inputs_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/testing3/simulation_inputs_folder/')
 
 # These are the names of the excel files which contain the detailed veg
 # mapping by BIOSIS in the PGAs. These are the attributed tables of veg
@@ -384,7 +407,9 @@ for (data_ind in seq_along(data_attributes)){
                                           current_data_attributes = data_attributes[[data_ind]], 
                                           condition_class_vals, 
                                           feature_params, 
-                                          condition_class_bounds = vector())
+                                          condition_class_bounds = vector(), 
+                                          modify_means = FALSE, 
+                                          means_modifier = vector())
     
     # This dealing with the overlaps between the Biosis PGA veg mapping and the Cumberland west veg mapping
     # for the overlap area use the biosis values
@@ -434,6 +459,15 @@ for (PCT_ind in seq_along(PCT_to_use)){
 
 # Same issue as above about combining the PGA data with the data fro the rest of the Cumberland mapping.
 
+# This is the vector you need to supply to yield higher feature values, and subsequently their matching feature dynamics. It needs to be of equal length
+# to the number of feature polygons in the current PCT, in this case defined by length(which(data_attributes[[data_ind]]$PCT == PCT_to_use)). All
+# values within vector range between [-1, 1] and are used to modify the distribution used to sample the feature values from.
+# Values in range [0, 1] increase the mean, values in range [-1, 0] decrease the mean. Therefore if you identify large (conservation) regions with values 
+# between [0, 1], and regions with poor connectivity between [-1, 0] you will get the effect that grouping offsets together will yield betetr results that 
+#splitting them apart. Note that this would ideally be calculated dynamically in situ as the simulation is running to account for the changes in the distribution
+# of sites as the simulation proceeds
+
+means_modifier = runif(min = -1, max = 1, length(which(data_attributes[[data_ind]]$PCT == PCT_to_use)))
 
 condition_vals_set = lapply(seq_along(data_attributes), 
                             function(i) lapply(seq_along(PCT_to_use), 
@@ -455,7 +489,9 @@ for (data_ind in seq_along(data_attributes)){
                                             feature_params, 
 
                                             # Note these are where the condition class bounds come from 
-                                            condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]])
+                                            condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]], 
+                                            modify_means = TRUE, 
+                                            means_modifier)
       
       if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
         current_feature = current_feature*(PGA_msk == 0)
