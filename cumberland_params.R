@@ -129,7 +129,7 @@ initialise_user_simulation_params <- function(){
   # to manually specify the number of developments per year. This needs to be
   # of length number of years. 
 
-  simulation_params$intervention_vec = build_stochastic_intervention(time_steps = simulation_params$time_steps, 
+  simulation_params$development_vec = build_stochastic_intervention(time_steps = simulation_params$time_steps, 
                                                                             intervention_start = 1, 
                                                                             intervention_end = simulation_params$time_steps, 
                                                                             intervention_num = simulation_params$intervention_num, 
@@ -151,8 +151,9 @@ initialise_user_simulation_params <- function(){
   # credit is large enough. FALSE means ignore any exces credit from offset exchanges
   simulation_params$allow_developments_from_credit = TRUE
   
-  # How the development parcels are selected options are 'stochastic' or
-  # 'weighted'. Note tha weighted requires an additonal weighting layer. If
+  # How the development parcels are selected options are 'stochastic',
+  # 'weighted', or 'pre-determined' where a predetermined development vector is passed in as a list. 
+  # Note that weighted requires an additonal weighting layer. If
   # you are running on your own data you need to specify the weights file in
   # intialise_routines.R  (or put the files in simulation_inputs)
   simulation_params$development_selection_type = 'stochastic'  
