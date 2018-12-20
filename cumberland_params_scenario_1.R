@@ -59,7 +59,7 @@ initialise_user_global_params <- function(){
   global_params$overwrite_management_dynamics = FALSE
   global_params$overwrite_feature_dynamics = FALSE
   global_params$overwrite_condition_classes = FALSE
-
+  global_params$build_background_cfacs = TRUE
 
   return(global_params)
 }
