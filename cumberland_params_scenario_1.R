@@ -69,14 +69,9 @@ initialise_user_global_params <- function(){
 initialise_user_simulation_params <- function(){ 
   
   simulation_params = list()
-  
 
-  
   # How long to run the simulaton in years
-  simulation_params$time_steps = 5 # 50
-  
-  # The number of developments 
-  simulation_params$intervention_num = 50 #500
+  simulation_params$time_steps = 15 # 50
   
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
@@ -119,16 +114,6 @@ initialise_user_simulation_params <- function(){
   simulation_params$max_site_screen_size_quantile = 0.999
   
 
-  # Builds the vector of number of developments per year.  this can be changed
-  # to manually specify the number of developments per year. This needs to be
-  # of length number of years. 
-
-  simulation_params$development_vec = build_stochastic_intervention(time_steps = simulation_params$time_steps, 
-                                                                            intervention_start = 1, 
-                                                                            intervention_end = simulation_params$time_steps, 
-                                                                            intervention_num = simulation_params$intervention_num, 
-                                                                            sd = 1)
-  
   #   c('net_gains', 'restoration_gains', 'avoided_condition_decline', 'avoided_loss',
   #     'protected_condition', 'current_condition', 'restored_condition')
   
@@ -145,12 +130,6 @@ initialise_user_simulation_params <- function(){
   # credit is large enough. FALSE means ignore any exces credit from offset exchanges
   simulation_params$allow_developments_from_credit = TRUE
   
-  # How the development parcels are selected options are 'stochastic',
-  # 'weighted', or 'pre-determined' where a predetermined development vector is passed in as a list. 
-  # Note that weighted requires an additonal weighting layer. If
-  # you are running on your own data you need to specify the weights file in
-  # intialise_routines.R  (or put the files in simulation_inputs)
-  simulation_params$development_selection_type = 'stochastic'  
   
   # The time horizon in which the offset gains need to equal the devlopment impact
   simulation_params$offset_time_horizon = 30
@@ -177,11 +156,39 @@ initialise_user_simulation_params <- function(){
   simulation_params$offset_multiplier = 1
 
   #set to greater than zero to allow developments without offsets
-  simulation_params$initial_credit = 0
+  simulation_params$initial_credit = 1e10
   
   # set to false to stop initial credit being transformed - this has a big impact when using the BAM metric which 
   # transforms large values to ceiling defined by 100.68
-  simulation_params$transform_initial_credit = TRUE
+  simulation_params$transform_initial_credit = FALSE
+  
+  simulation_params$banked_offset_selection_type = 'pre_determined'  
+  banked_offset_control = vector('list', simulation_params$time_steps)
+  banked_offset_control[1:simulation_params$time_steps] = array(0, simulation_params$time_steps)
+  banked_offset_control[[1]] = 5001:10000
+  simulation_params$banked_offset_control = list(banked_offset_control)
+  
+  # How the development parcels are selected options are 'stochastic',
+  # 'weighted', or 'pre-determined' where a predetermined development vector is passed in as a list. 
+  # Note that weighted requires an additonal weighting layer. If
+  # you are running on your own data you need to specify the weights file in
+  # intialise_routines.R  (or put the files in simulation_inputs)
+  simulation_params$development_selection_type = 'pre_determined'  
+  
+
+  development_control = vector('list', simulation_params$time_steps)
+  development_control[1:simulation_params$time_steps] = array(0, simulation_params$time_steps)
+  development_control[1:simulation_params$time_steps] = 51:(50 + simulation_params$time_steps)
+  development_control[[3]] = 1001:5000
+  development_control[[5]] = 9000:11000
+  
+  simulation_params$development_control = list(development_control)
+  
+  #ignore offset sites with zero value
+  simulation_params$screen_offset_zeros = TRUE
+  
+  # ignore development sites with zero value
+  simulation_params$screen_dev_zeros = FALSE
   
   
   return(simulation_params)
@@ -235,17 +242,13 @@ initialise_user_feature_params <- function(){
   
   feature_params$project_by_mean = TRUE
   
-  feature_params$management_update_dynamics_by_differential = TRUE
-  feature_params$background_update_dynamics_by_differential = TRUE
+  feature_params$update_management_dynamics_by_differential = TRUE
+  feature_params$update_background_dynamics_by_differential = TRUE
   
   feature_params$perform_management_dynamics_time_shift = FALSE
   feature_params$perform_background_dynamics_time_shift = FALSE
   
-  feature_params$update_offset_dynamics_by_time_shift = TRUE
-  
   feature_params$sample_management_dynamics = TRUE
-  
-  # Sample the background dynamics from a uniform distribution to they vary per site and per feature
   feature_params$sample_background_dynamics = TRUE
   
   #how many feature layers to generate
@@ -362,8 +365,6 @@ initialise_user_output_params <- function(){
   
   # the dev-offset to plot for the site level results.
   output_params$sets_to_plot = 1
-
-
   output_params$plot_site = TRUE
   output_params$plot_program = TRUE
   output_params$plot_landscape = TRUE
@@ -374,7 +375,7 @@ initialise_user_output_params <- function(){
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
 
   output_params$write_pdf = FALSE
-  output_params$output_type = 'plot' # set to 'raster', 'png', 'plot', or 'csv'
+  output_params$output_type = 'png' # set to 'raster', 'png', 'plot', or 'csv'
 
   # was originally done 
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'

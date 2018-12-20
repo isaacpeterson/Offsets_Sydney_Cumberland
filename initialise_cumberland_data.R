@@ -147,7 +147,7 @@ priority_data_filenames = c("mac_veg_rst_exprt.tif", "west_veg_rst_exprt.tif", "
 # but needs to have the Sydney Metro veg data added to it.
 feature_ID_layers = offsetsim::load_rasters(paste0(data_folder, c(priority_data_filenames, "cum_ID_rast1.tif")), features_to_use = 'all')
 
-# Converss the stack of 4 layers to a list of arrarys, turning NAs to zeros.
+# Converss the stack of 4 layers to a list of arrays, turning NAs to zeros.
 # The values in the array represent the IDs for each polygon of Veg
 feature_ID_layers = lapply(seq(dim(feature_ID_layers)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_layers, i)))
 
@@ -165,7 +165,7 @@ PGA_msk = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder,
 
 # Build the site characteristics object. Contains the info the simulation to
 # assign pixel values to appropriate parcel and vegetation polygons. This
-# object is a list of vectors and arrarys etc...
+# object is a list of vectors and arrays etc...
 if (file.exists(paste0(simulation_inputs_folder, 'site_characteristics.rds')) & (overwrite_site_characteristics == FALSE)){
   site_characteristics = readRDS(paste0(simulation_inputs_folder, 'site_characteristics.rds'))
 } else {
@@ -388,7 +388,7 @@ condition_class_set = lapply(seq_along(data_attributes), function(i) vector('lis
 
 
 # ----------------------
-# Building the condition class arrary which gives the condition class of each pixel to then write them to raster layers 
+# Building the condition class array which gives the condition class of each pixel to then write them to raster layers 
 # ----------------------
 
 for (data_ind in seq_along(data_attributes)){
@@ -426,7 +426,7 @@ for (data_ind in seq_along(data_attributes)){
 }
 
 
-# for each PCT, add the PGA condition arrary to the sampled condition array.
+# for each PCT, add the PGA condition array to the sampled condition array.
 
 merged_condition_classes = vector('list', length(PCT_to_use))
 for (PCT_ind in seq_along(PCT_to_use)){
@@ -451,7 +451,7 @@ for (PCT_ind in seq_along(PCT_to_use)){
 
 
 # ----------------------
-# Building the condition value arrary which gives the condition value of each pixel to then write them to raster layers for each feature 
+# Building the condition value array which gives the condition value of each pixel to then write them to raster layers for each feature 
 # ----------------------
 
 
