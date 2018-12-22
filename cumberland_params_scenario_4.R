@@ -165,7 +165,7 @@ initialise_user_simulation_params <- function(){
   simulation_params$banked_offset_control = list(build_stochastic_intervention(simulation_params$time_steps, 
                                                                           intervention_start = 1, 
                                                                           intervention_end = 37, 
-                                                                          intervention_num = 10000, 
+                                                                          intervention_num = 20000, 
                                                                           sd = 1))
    
   # How the development parcels are selected options are 'stochastic',

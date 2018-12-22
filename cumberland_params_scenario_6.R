@@ -163,10 +163,10 @@ initialise_user_simulation_params <- function(){
   simulation_params$banked_offset_selection_type = 'stochastic'  
   
   simulation_params$banked_offset_control = list(build_stochastic_intervention(simulation_params$time_steps, 
-                                                                          intervention_start = 1, 
-                                                                          intervention_end = 37, 
-                                                                          intervention_num = 10000, 
-                                                                          sd = 1))
+                                                                               intervention_start = 1, 
+                                                                               intervention_end = 37, 
+                                                                               intervention_num = 20000, 
+                                                                               sd = 1))
   
   # How the development parcels are selected options are 'stochastic',
   # 'weighted', or 'pre-determined' where a predetermined development vector is passed in as a list. 
@@ -293,9 +293,6 @@ initialise_user_feature_params <- function(){
   unmanaged_datasheets = list(4, 8, 12, 16, 20)
   
   background_dynamics_set = collate_dynamics(full_dynamics_set, background_datasheets, set_index_to_use = 1)
-  
-  
-  #high_intensity_management_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
   management_dynamics_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
   
   unmanaged_set = collate_dynamics(full_dynamics_set, unmanaged_datasheets, set_index_to_use = 1)
@@ -303,7 +300,8 @@ initialise_user_feature_params <- function(){
   management_dynamics_set = lapply(seq_along(management_dynamics_set), function(i) append(management_dynamics_set[[i]], unmanaged_set[[i]]))
   
   #management_dynamics_set = lapply(seq_along(management_dynamics_set), function(i) append(management_dynamics_set[[i]], management_dynamics_set[[i]][3]))
-
+  
+  #high_intensity_management_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
   
   feature_params$initial_condition_class_bounds = lapply(seq_along(background_dynamics_set), 
                                                          function(i) lapply(seq_along(background_dynamics_set[[i]]), 

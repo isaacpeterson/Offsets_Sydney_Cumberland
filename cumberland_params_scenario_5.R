@@ -162,7 +162,7 @@ initialise_user_simulation_params <- function(){
   simulation_params$banked_offset_selection_type = 'pre_determined'  
   banked_offset_control = vector('list', simulation_params$time_steps)
   banked_offset_control[1:simulation_params$time_steps] = array(0, simulation_params$time_steps)
-  banked_offset_control[[1]] = 1e4:2e4
+  banked_offset_control[[1]] = 4e5:8e5
   simulation_params$banked_offset_control = list(banked_offset_control)
   simulation_params$offset_bank_type = 'credit'    
   
@@ -291,8 +291,6 @@ initialise_user_feature_params <- function(){
   unmanaged_datasheets = list(4, 8, 12, 16, 20)
   
   background_dynamics_set = collate_dynamics(full_dynamics_set, background_datasheets, set_index_to_use = 1)
-  
-  #high_intensity_management_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
   management_dynamics_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
   
   unmanaged_set = collate_dynamics(full_dynamics_set, unmanaged_datasheets, set_index_to_use = 1)
@@ -301,7 +299,7 @@ initialise_user_feature_params <- function(){
   
   #management_dynamics_set = lapply(seq_along(management_dynamics_set), function(i) append(management_dynamics_set[[i]], management_dynamics_set[[i]][3]))
   
-
+  #high_intensity_management_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
   
   feature_params$initial_condition_class_bounds = lapply(seq_along(background_dynamics_set), 
                                                          function(i) lapply(seq_along(background_dynamics_set[[i]]), 
@@ -386,7 +384,7 @@ initialise_user_output_params <- function(){
   output_params$print_dev_offset_sites = FALSE
   
   #ouput offset sites as block colors rather than site_vals
-  output_params$output_block_offsets = FALSE
+  output_params$output_block_offsets = TRUE
   
   # number of plot sub windows
   output_params$nx = 3 
