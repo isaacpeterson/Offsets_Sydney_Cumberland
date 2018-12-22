@@ -160,7 +160,7 @@ initialise_user_simulation_params <- function(){
   
   simulation_params$use_offset_bank = TRUE
   simulation_params$offset_bank_type = 'credit' 
-  simulation_params$banked_offset_selection_type = 'pre_determined'  
+  simulation_params$banked_offset_selection_type = 'stochastic'  
   
   simulation_params$banked_offset_control = list(build_stochastic_intervention(simulation_params$time_steps, 
                                                                           intervention_start = 1, 
