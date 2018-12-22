@@ -4,13 +4,13 @@ initialise_user_global_params <- function(){
   
   global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
   #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
-
+  
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                  pattern = 'PCT_849_feature_', all.files = FALSE, 
-                                                  full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
-                                                  include.dirs = FALSE, no.. = FALSE)))
-
+                                                          pattern = 'PCT_849_feature_', all.files = FALSE, 
+                                                          full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
+                                                          include.dirs = FALSE, no.. = FALSE)))
+  
   global_params$planning_units_raster = paste0(global_params$simulation_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
   
   global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
@@ -18,7 +18,7 @@ initialise_user_global_params <- function(){
                                                                   pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
-
+  
   global_params$store_zeros_as_sparse = TRUE
   
   # The number of cores to run on.
@@ -32,11 +32,11 @@ initialise_user_global_params <- function(){
   # Builds site_characteristics object. Note for Cumberland analysis always
   # want this to be FALSE as this is built in initialise_cumberland_data.R
   global_params$overwrite_site_characteristics = FALSE
-
+  
   global_params$run_from_simulated_data = FALSE
   
   global_params$save_simulation_outputs = TRUE
-
+  
   # If these are set to TRUE, then every parcel will have an equal probability
   # of being developed and offset which you DON'T WANT if running development
   # in the PGAs. So these should be set to FALSE for if specifying dev and
@@ -46,18 +46,18 @@ initialise_user_global_params <- function(){
   global_params$overwrite_unregulated_probability_list = FALSE
   
   global_params$overwrite_site_features = TRUE
-
+  
   # If building all inputs from scratch via the initialise_cumberland_data.R,
   # then these need to be set to TRUE for the first run, to generate the
   # appropriate R objects. For subsequent runs they can be set to FALSE to
   # save time. However it's not problem if they are left as TRUE, the run will
   # just take a bit longer to get started.
-
+  
   global_params$overwrite_management_dynamics = FALSE
   global_params$overwrite_feature_dynamics = FALSE
   global_params$overwrite_condition_classes = FALSE
   global_params$build_background_cfacs = FALSE
-
+  
   return(global_params)
 }
 
@@ -66,7 +66,7 @@ initialise_user_global_params <- function(){
 initialise_user_simulation_params <- function(){ 
   
   simulation_params = list()
-
+  
   # How long to run the simulaton in years
   simulation_params$time_steps = 37 # 50
   
@@ -74,7 +74,7 @@ initialise_user_simulation_params <- function(){
   # gets set to this number - set to zero to turn off. Be careful as this is
   # dependant on the total number of parcels.
   simulation_params$unregulated_loss_prob = 0.001
-
+  
   # What subset of features to use in the simulation
   # Need to keep these as is to use veg integrity score
   simulation_params$features_to_use_in_simulation = 1:5
@@ -82,7 +82,7 @@ initialise_user_simulation_params <- function(){
   # The total number of layers to use in the offset calcuation (iterating from the start)
   # Need to keep these as is to use veg integrity score
   simulation_params$features_to_use_in_offset_calc = 1:5
- 
+  
   # Speifies what is affected by the offset intervention
   # Need to keep these as is to use veg integrity score
   simulation_params$features_to_use_in_offset_intervention = 1:5
@@ -97,7 +97,7 @@ initialise_user_simulation_params <- function(){
   simulation_params$transform_params = c(5, 12, 15, 22, 45)
   
   # The maximum number of parcels can be selected to offset a single development
-
+  
   simulation_params$max_offset_parcel_num = 10
   
   # Stops the offset from delivering any further gains once it has acheived the gains required
@@ -106,11 +106,11 @@ initialise_user_simulation_params <- function(){
   
   # Exclude parcels with less than this number of pixels.
   simulation_params$min_site_screen_size = 5
-
+  
   # Removing the very largest parcels in the top 0.1% of the size distribution.
   simulation_params$max_site_screen_size_quantile = 0.999
   
-
+  
   #   c('net_gains', 'restoration_gains', 'avoided_condition_decline', 'avoided_loss',
   #     'protected_condition', 'current_condition', 'restored_condition')
   
@@ -150,7 +150,7 @@ initialise_user_simulation_params <- function(){
   # they were caluclated) and the offset impact then needs to match this
   # multiplied development impact
   simulation_params$offset_multiplier = 1
-
+  
   #set to greater than zero to allow developments without offsets
   simulation_params$initial_credit = 1e10
   
@@ -158,23 +158,28 @@ initialise_user_simulation_params <- function(){
   # transforms large values to ceiling defined by 100.68
   simulation_params$transform_initial_credit = FALSE
   
-  simulation_params$use_offset_bank = FALSE
+  simulation_params$use_offset_bank = TRUE
+  simulation_params$offset_bank_type = 'credit' 
   simulation_params$banked_offset_selection_type = 'pre_determined'  
-  banked_offset_control = vector('list', simulation_params$time_steps)
-  banked_offset_control[1:simulation_params$time_steps] = array(0, simulation_params$time_steps)
-  simulation_params$banked_offset_control = list(banked_offset_control)
-  simulation_params$offset_bank_type = 'credit'     
-
+  
+  simulation_params$banked_offset_control = build_stochastic_intervention(simulation_params$time_steps, 
+                                                                          intervention_start = 1, 
+                                                                          intervention_end = 37, 
+                                                                          intervention_num = 10000, 
+                                                                          sd = 1)
+  
   # How the development parcels are selected options are 'stochastic',
   # 'weighted', or 'pre-determined' where a predetermined development vector is passed in as a list. 
   # Note that weighted requires an additonal weighting layer. If
   # you are running on your own data you need to specify the weights file in
   # intialise_routines.R  (or put the files in simulation_inputs)
-  simulation_params$development_selection_type = 'pre_determined'  
+  simulation_params$development_selection_type = 'stochastic'  
   
-  development_control = vector('list', simulation_params$time_steps)
-  development_control[1:simulation_params$time_steps] = array(0, simulation_params$time_steps)
-  simulation_params$development_control = list(development_control)
+  simulation_params$development_control = list(build_stochastic_intervention(simulation_params$time_steps, 
+                                                                             intervention_start = 1, 
+                                                                             intervention_end = 37, 
+                                                                             intervention_num = 3789, 
+                                                                             sd = 1))
   
   #ignore offset sites with zero value
   simulation_params$screen_offset_zeros = TRUE
@@ -210,14 +215,14 @@ user_transform_function <- function(pool_vals, transform_params){
 
 
 initialise_user_feature_params <- function(){
-
+  
   current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds') # works
   #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkeith_splines.rds') # works
-
+  
   #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds')
   #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_pprice_splines.rds')
   #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
-
+  
   feature_params = list()
   feature_params$scale_features = FALSE
   # how the feature dynamics are determined
@@ -245,19 +250,19 @@ initialise_user_feature_params <- function(){
   
   #how many feature layers to generate
   feature_params$simulated_feature_num = 5
-
-
+  
+  
   # The larger this value is the more extrapolating with the splines
-
+  
   
   #the time over which the experts defined the curves
-
+  
   feature_params$simulated_time_vec = 0:80
-#   full_dynamics_set = lapply(seq_along(current_author_splines),  
-#                              function(i) lapply(seq_along(current_author_splines[[i]]), 
-#                                                 function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
-#                                                                    function(k) predict(current_author_splines[[i]][[j]][[k]], 
-#                                                                                        feature_params$simulated_time_vec)$y)))
+  #   full_dynamics_set = lapply(seq_along(current_author_splines),  
+  #                              function(i) lapply(seq_along(current_author_splines[[i]]), 
+  #                                                 function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
+  #                                                                    function(k) predict(current_author_splines[[i]][[j]][[k]], 
+  #                                                                                        feature_params$simulated_time_vec)$y)))
   
   # full_dynamics_set is a list of vectors for each of the expert curves
   # map splines to simulated_time_vec, first loop  
@@ -265,18 +270,18 @@ initialise_user_feature_params <- function(){
   # k loop: upper bound best estimtate lower bound
   # j loop: veg condition type (L, M1, M2, H)
   # i look: lifeform: grass, trees etc
-
-
+  
+  
   full_dynamics_set = lapply(seq_along(current_author_splines),  
                              function(i) lapply(seq_along(current_author_splines[[i]]), 
                                                 function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
                                                                    function(k) current_author_splines[[i]][[j]][[k]](feature_params$simulated_time_vec))))
-
+  
   # This is just reordering the best upper and lower bound
   full_dynamics_set = lapply(seq_along(full_dynamics_set),  
                              function(i) lapply(seq_along(full_dynamics_set[[i]]), 
                                                 function(j) full_dynamics_set[[i]][[j]][c(1, 3, 2)])) 
-
+  
   # This is to set any value below zero back to zero (can get negative numbers from spline extrapolation)
   full_dynamics_set = lapply(seq_along(full_dynamics_set),  
                              function(i) lapply(seq_along(full_dynamics_set[[i]]), 
@@ -288,21 +293,23 @@ initialise_user_feature_params <- function(){
   unmanaged_datasheets = list(4, 8, 12, 16, 20)
   
   background_dynamics_set = collate_dynamics(full_dynamics_set, background_datasheets, set_index_to_use = 1)
-  management_dynamics_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 2)
+  
+  
+  #high_intensity_management_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
+  management_dynamics_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
   
   unmanaged_set = collate_dynamics(full_dynamics_set, unmanaged_datasheets, set_index_to_use = 1)
   
   management_dynamics_set = lapply(seq_along(management_dynamics_set), function(i) append(management_dynamics_set[[i]], unmanaged_set[[i]]))
   
   #management_dynamics_set = lapply(seq_along(management_dynamics_set), function(i) append(management_dynamics_set[[i]], management_dynamics_set[[i]][3]))
-  
-  #high_intensity_management_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
 
+  
   feature_params$initial_condition_class_bounds = lapply(seq_along(background_dynamics_set), 
-                                                 function(i) lapply(seq_along(background_dynamics_set[[i]]), 
-                                                                    function(j) c(max(background_dynamics_set[[i]][[j]]$lower_bound[1], management_dynamics_set[[i]][[j]]$lower_bound[1]), 
-                                                                                  mean(background_dynamics_set[[i]][[j]]$best_estimate[1], management_dynamics_set[[i]][[j]]$best_estimate[1]), 
-                                                                                  min(background_dynamics_set[[i]][[j]]$upper_bound[1], management_dynamics_set[[i]][[j]]$upper_bound[1]))))
+                                                         function(i) lapply(seq_along(background_dynamics_set[[i]]), 
+                                                                            function(j) c(max(background_dynamics_set[[i]][[j]]$lower_bound[1], management_dynamics_set[[i]][[j]]$lower_bound[1]), 
+                                                                                          mean(background_dynamics_set[[i]][[j]]$best_estimate[1], management_dynamics_set[[i]][[j]]$best_estimate[1]), 
+                                                                                          min(background_dynamics_set[[i]][[j]]$upper_bound[1], management_dynamics_set[[i]][[j]]$upper_bound[1]))))
   
   feature_params$condition_class_bounds = lapply(seq_along(background_dynamics_set), 
                                                  function(i) lapply(seq_along(background_dynamics_set[[i]]), 
@@ -310,21 +317,21 @@ initialise_user_feature_params <- function(){
                                                                                   mean(c(background_dynamics_set[[i]][[j]]$best_estimate, management_dynamics_set[[i]][[j]]$best_estimate)), 
                                                                                   max(c(background_dynamics_set[[i]][[j]]$upper_bound, management_dynamics_set[[i]][[j]]$upper_bound)) )))
   
-
-#   setup_sub_plots(nx = 4, ny = 5, x_space = 2, y_space = 2)
-#   
-#   for (feature_ind in 1:5){
-#     for (mode_ind in 1:4){
-#       plot(background_dynamics_set[[feature_ind]][[mode_ind]]$lower_bound, type = 'l', col = 'blue', ylim = c(0, 40))
-#       lines(background_dynamics_set[[feature_ind]][[mode_ind]]$best_estimate, type = 'l', col = 'black')
-#       lines(background_dynamics_set[[feature_ind]][[mode_ind]]$upper_bound, type = 'l', col = 'red')
-#       
-#       
-#     }
-#   }
-
+  
+  #   setup_sub_plots(nx = 4, ny = 5, x_space = 2, y_space = 2)
+  #   
+  #   for (feature_ind in 1:5){
+  #     for (mode_ind in 1:4){
+  #       plot(background_dynamics_set[[feature_ind]][[mode_ind]]$lower_bound, type = 'l', col = 'blue', ylim = c(0, 40))
+  #       lines(background_dynamics_set[[feature_ind]][[mode_ind]]$best_estimate, type = 'l', col = 'black')
+  #       lines(background_dynamics_set[[feature_ind]][[mode_ind]]$upper_bound, type = 'l', col = 'red')
+  #       
+  #       
+  #     }
+  #   }
+  
   feature_params$management_condition_class_bounds = feature_params$condition_class_bounds
-    
+  
   feature_params$background_dynamics_bounds = background_dynamics_set
   feature_params$management_dynamics_bounds = management_dynamics_set
   
@@ -344,15 +351,15 @@ setup_sub_plots <- function(nx, ny, x_space, y_space){
 
 initialise_user_output_params <- function(){
   output_params = list()
-
+  
   # if leave it as an empty vec will put in the the collated realizations
   # folder, otherwise you specify the path
   output_params$output_folder = vector() 
-
+  
   output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts'
-
+  
   # use 'all' for all or therwise the numern eg 6 means the first 6 realiztaions.
-
+  
   output_params$realisation_num = 'all' # 'all' or number to plot
   
   # the dev-offset to plot for the site level results.
@@ -360,26 +367,26 @@ initialise_user_output_params <- function(){
   output_params$plot_site = TRUE
   output_params$plot_program = TRUE
   output_params$plot_landscape = TRUE
-
+  
   # if this is false won't generate plots of maps for the offset metric
   output_params$plot_offset_metric = TRUE
   
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
-
+  
   output_params$write_pdf = FALSE
   output_params$output_type = 'png' # set to 'raster', 'png', 'plot', or 'csv'
-
+  
   # was originally done 
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
   output_params$plot_subset_param = 'all' #c('maintain') # 'net_gains', 'restore', 15
-
+  
   # Set this to zero and it will only output the metric, if metric has been set to true. 
   # need to add flag to capture this and exit is the metric has been set to false.
   output_params$features_to_output = 0 #1:5
-
+  
   # print the number of offsets and developments to screen
   output_params$print_dev_offset_sites = FALSE
-
+  
   #ouput offset sites as block colors rather than site_vals
   output_params$output_block_offsets = FALSE
   
@@ -391,7 +398,7 @@ initialise_user_output_params <- function(){
   output_params$site_outcome_plot_lims_set = list(rep(list(c(0, 1e2)), 5))
   output_params$program_outcome_plot_lims_set = list(rep(list(c(0e6, 1e5))), 5)
   output_params$landscape_outcome_plot_lims_set = list(rep(list(c(0, 2e5))))
-
+  
   #set of nested lists by scenario and feature (which in this case is 5)
   output_params$site_impact_plot_lims_set = list(list(c(-1e2, 1e2), c(-1e2, 1e2), c(-1e2, 1e2), c(-5e2, 5e2), c(-5e2, 5e2), c(-5e2, 5e2)))
   output_params$program_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5))) 
@@ -399,17 +406,17 @@ initialise_user_output_params <- function(){
   
   # write the raw condition value to file if fase, otherwise write the rescaled values as per the colour ramps below.
   output_params$map_vals = TRUE
-
+  
   # Changes these colours 
   black_green.palette <- colorRampPalette(c("black", "green"), space = "rgb")  
   black_blue.palette <- colorRampPalette(c("black", "blue"), space = "rgb")
-
+  
   # set a colour ramp the red is for dev parcels, the orange is for unregulated dev.
   # black_green.palette(128) is for background, black_blue.palette(128) is for offsets
   output_params$col_vec = c(black_green.palette(128), black_blue.palette(128), 'red', 'orange')
   output_params$col_map_vector = c(128, 128, 256, 256, 257) #c(offset_col, offset_bank_col, dev_col, dev_credit_col, unregulated_loss_col)
-
-
+  
+  
   return(output_params)
 }
 
