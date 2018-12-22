@@ -25,7 +25,7 @@ initialise_user_global_params <- function(){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 1
+  global_params$realisation_num = 12
   
   global_params$save_simulation_outputs = TRUE
   
@@ -56,7 +56,7 @@ initialise_user_global_params <- function(){
   global_params$overwrite_management_dynamics = FALSE
   global_params$overwrite_feature_dynamics = FALSE
   global_params$overwrite_condition_classes = FALSE
-  global_params$build_background_cfacs = FALSE
+  global_params$build_background_cfacs = TRUE
 
   return(global_params)
 }
