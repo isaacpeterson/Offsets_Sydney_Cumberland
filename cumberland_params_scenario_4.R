@@ -53,7 +53,7 @@ initialise_user_global_params <- function(){
   # save time. However it's not problem if they are left as TRUE, the run will
   # just take a bit longer to get started.
   
-  global_params$overwrite_management_dynamics = FALSE
+  global_params$overwrite_management_dynamics = TRUE
   global_params$overwrite_feature_dynamics = FALSE
   global_params$overwrite_condition_classes = FALSE
   global_params$build_background_cfacs = FALSE
