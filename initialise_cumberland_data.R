@@ -78,9 +78,6 @@ modify_mean <- function(current_condition_class_bounds, current_mean_modifier){
 }
 
 
-
-
-
 build_probability_list <- function(weight_layer, land_parcels, site_indexes_to_exclude){
 
   intervention_weights = rep(list(0), length(land_parcels))
@@ -102,7 +99,7 @@ project_data_to_zone_56 <- function(shp_to_project){
 }
   
 
- source('cumberland_params.R')
+source('cumberland_params.R')
 #source('/Users/ascelin/analysis/GitHub/Offsets_Sydney_Cumberland/cumberland_params.R')
 
 
@@ -140,14 +137,14 @@ priority_data_att_files = c('mac_veg_att', 'west_veg_att', 'wilton_veg_att')
 # priority_data_att_files is a excel file of the attribute table.
 priority_data_filenames = c("mac_veg_rst_exprt.tif", "west_veg_rst_exprt.tif", "wilt_veg_rst_exprt.tif")
 
-
 # Makes a raster stack of 4 layers: the Biosis veg mapping from the 3 PGAs
 # (mac_veg_rst_exprt.tif, west_veg_rst_exprt.tif, wilt_veg_rst_exprt.tif), as
 # well as cum_ID_rast1.tif, which is currently the cumberland West veg data,
 # but needs to have the Sydney Metro veg data added to it.
+
 feature_ID_layers = offsetsim::load_rasters(paste0(data_folder, c(priority_data_filenames, "cum_ID_rast1.tif")), features_to_use = 'all')
 
-# Converss the stack of 4 layers to a list of arrays, turning NAs to zeros.
+# Convert the stack of 4 layers to a list of arrays, turning NAs to zeros.
 # The values in the array represent the IDs for each polygon of Veg
 feature_ID_layers = lapply(seq(dim(feature_ID_layers)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_layers, i)))
 
@@ -161,7 +158,6 @@ cadastre_msk = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_fo
 
 # This should be a 0/1 raster that define the PGAs.
 PGA_msk = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder,"priority_rast_exprt.tif"), features_to_use = 'all')) > 0
-
 
 # Build the site characteristics object. Contains the info the simulation to
 # assign pixel values to appropriate parcel and vegetation polygons. This
@@ -193,7 +189,7 @@ dev_msk = PGA_msk * cadastre_msk
 # Note - the two masks dont perfectly overlap - hence enforce cadastre msk boundaries - otherwise redefine cadastre_msk in ARCGIS
 # Set to zero any areas that zero in either layer.
 # Note: if I want exclude exisiting conservation areas for offsets, I would add them in here. 
-offset_region = (!dev_msk*cadastre_msk)
+offset_region = ((1 - dev_msk)*cadastre_msk)
 
 unregulated_loss_region = cadastre_msk
 
@@ -377,10 +373,8 @@ cumberland_att$Condition = cumberland_conditions
 # Binds the cumberland_att with new condition info to the PGA Biosis data
 data_attributes = append(priority_data_attributes, list(cumberland_att))
 
-
 # sets the list names to match the veg layers
 names(data_attributes) = c(priority_data_att_files, 'cum_veg_att')
-
 
 # Builds a nested list defined by the 4 data layers and of length PCT_to_use  
 # to save info for each PCT separately.
@@ -415,7 +409,7 @@ for (data_ind in seq_along(data_attributes)){
 
     if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
       # outside PGAs so use sampled data
-      current_feature = current_feature*(!PGA_msk)
+      current_feature = current_feature*(1 - PGA_msk)
     } else {
       # Use Biosis data
       current_feature = current_feature*PGA_msk
@@ -423,6 +417,7 @@ for (data_ind in seq_along(data_attributes)){
     condition_class_set[[data_ind]][[PCT_ind]] = current_feature
 
   }
+  paste0('data attribute ', data_ind, ' completed')
 }
 
 
@@ -486,7 +481,6 @@ for (data_ind in seq_along(data_attributes)){
                                             current_data_attributes = data_attributes[[data_ind]], 
                                             condition_class_vals, 
                                             feature_params, 
-
                                             # Note these are where the condition class bounds come from 
                                             condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]], 
                                             modify_means = TRUE, 
