@@ -20,7 +20,8 @@ initialise_user_global_params <- function(){
                                                                   include.dirs = FALSE, no.. = FALSE)))
 
   global_params$store_zeros_as_sparse = TRUE
-  
+  # set to FALSE if running into memory troubles when collating
+  global_params$collate_with_parallel_cores = FALSE
   # The number of cores to run on.
   global_params$number_of_cores = 'all'
   

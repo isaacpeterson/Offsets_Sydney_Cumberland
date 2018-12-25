@@ -25,7 +25,10 @@ initialise_user_global_params <- function(){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 12
+  global_params$realisation_num = 2
+  
+  # set to FALSE if running into memory troubles when collating
+  global_params$collate_with_parallel_cores = FALSE
   
   global_params$save_simulation_outputs = TRUE
   
@@ -68,7 +71,7 @@ initialise_user_simulation_params <- function(){
   simulation_params = list()
   
   # How long to run the simulaton in years
-  simulation_params$time_steps = 37 # 50
+  simulation_params$time_steps = 6 # 50
   
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
