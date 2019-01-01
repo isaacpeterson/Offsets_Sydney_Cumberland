@@ -172,7 +172,7 @@ if (file.exists(paste0(simulation_inputs_folder, 'site_characteristics.rds')) & 
   cat('\nWrote site_characteristics.rds')
 }
 
-
+browser()
 
 # Note - the two masks dont perfectly overlap - hence enforce cadastre msk boundaries - otherwise redefine cadastre_msk in ARCGIS
 # Set to zero any areas that zero in either layer.
