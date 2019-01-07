@@ -28,7 +28,6 @@ initialise_user_global_params <- function(){
   
   # set to FALSE if running into memory troubles when collating
   global_params$collate_with_parallel_cores = TRUE
-  
   # The number of cores to run on.
   global_params$number_of_cores = 'all'
   
@@ -61,7 +60,7 @@ initialise_user_global_params <- function(){
   # save time. However it's not problem if they are left as TRUE, the run will
   # just take a bit longer to get started.
   
-  global_params$overwrite_management_dynamics = FALSE
+  global_params$overwrite_management_dynamics = TRUE
   global_params$overwrite_feature_dynamics = FALSE
   global_params$overwrite_condition_classes = FALSE
   global_params$build_background_cfacs = FALSE
@@ -165,20 +164,15 @@ initialise_user_simulation_params <- function(){
   simulation_params$transform_initial_credit = FALSE
   
   simulation_params$use_offset_bank = TRUE
+  simulation_params$offset_bank_type = 'credit' 
   simulation_params$banked_offset_selection_type = 'pre_determined'  
+  simulation_params$development_selection_type = 'stochastic'  
+  
   banked_offset_control = vector('list', simulation_params$time_steps)
   banked_offset_control[1:simulation_params$time_steps] = array(0, simulation_params$time_steps)
   banked_offset_control[[1]] = 4e5:8e5
   simulation_params$banked_offset_control = list(banked_offset_control)
-  simulation_params$offset_bank_type = 'credit'    
-  
-  # How the development parcels are selected options are 'stochastic',
-  # 'weighted', or 'pre-determined' where a predetermined development vector is passed in as a list. 
-  # Note that weighted requires an additonal weighting layer. If
-  # you are running on your own data you need to specify the weights file in
-  # intialise_routines.R  (or put the files in simulation_inputs)
-  simulation_params$development_selection_type = 'stochastic'  
-  
+
   simulation_params$development_control = list(build_stochastic_intervention(simulation_params$time_steps, 
                                                                              intervention_start = 1, 
                                                                              intervention_end = 37, 

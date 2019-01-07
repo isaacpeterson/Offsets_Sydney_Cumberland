@@ -4,13 +4,13 @@ initialise_user_global_params <- function(){
   
   global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
   #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
-
+  
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
-                                                  pattern = 'PCT_849_feature_', all.files = FALSE, 
-                                                  full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
-                                                  include.dirs = FALSE, no.. = FALSE)))
-
+                                                          pattern = 'PCT_849_feature_', all.files = FALSE, 
+                                                          full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
+                                                          include.dirs = FALSE, no.. = FALSE)))
+  
   global_params$planning_units_raster = paste0(global_params$simulation_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
   
   global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
@@ -18,26 +18,32 @@ initialise_user_global_params <- function(){
                                                                   pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
-
+  
+  # What subset of features to use in the simulation
+  # Need to keep these as is to use veg integrity score
+  
+  global_params$features_to_use_in_simulation = 1:5
+  
   global_params$store_zeros_as_sparse = TRUE
+  
   # set to FALSE if running into memory troubles when collating
-  global_params$collate_with_parallel_cores = FALSE
+  global_params$collate_with_parallel_cores = TRUE
   # The number of cores to run on.
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 12
+  global_params$realisation_num = 1
   
   global_params$save_simulation_outputs = TRUE
   
   # Builds site_characteristics object. Note for Cumberland analysis always
   # want this to be FALSE as this is built in initialise_cumberland_data.R
   global_params$overwrite_site_characteristics = FALSE
-
+  
   global_params$run_from_simulated_data = FALSE
   
   global_params$save_simulation_outputs = TRUE
-
+  
   # If these are set to TRUE, then every parcel will have an equal probability
   # of being developed and offset which you DON'T WANT if running development
   # in the PGAs. So these should be set to FALSE for if specifying dev and
@@ -46,21 +52,22 @@ initialise_user_global_params <- function(){
   global_params$overwrite_offset_probability_list = FALSE
   global_params$overwrite_unregulated_probability_list = FALSE
   
-  global_params$overwrite_site_features = TRUE
-
+  global_params$overwrite_site_features = FALSE
+  
   # If building all inputs from scratch via the initialise_cumberland_data.R,
   # then these need to be set to TRUE for the first run, to generate the
   # appropriate R objects. For subsequent runs they can be set to FALSE to
   # save time. However it's not problem if they are left as TRUE, the run will
   # just take a bit longer to get started.
-
-  global_params$overwrite_management_dynamics = FALSE
+  
+  global_params$overwrite_management_dynamics = TRUE
   global_params$overwrite_feature_dynamics = FALSE
   global_params$overwrite_condition_classes = FALSE
-  global_params$build_background_cfacs = TRUE
-
+  global_params$build_background_cfacs = FALSE
+  
   return(global_params)
 }
+
 
 
 
@@ -75,10 +82,6 @@ initialise_user_simulation_params <- function(){
   # gets set to this number - set to zero to turn off. Be careful as this is
   # dependant on the total number of parcels.
   simulation_params$unregulated_loss_prob = 0.001
-
-  # What subset of features to use in the simulation
-  # Need to keep these as is to use veg integrity score
-  simulation_params$features_to_use_in_simulation = 1:5
   
   # The total number of layers to use in the offset calcuation (iterating from the start)
   # Need to keep these as is to use veg integrity score

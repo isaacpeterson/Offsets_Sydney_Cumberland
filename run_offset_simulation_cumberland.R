@@ -1,6 +1,6 @@
 library(offsetsim)
 
-source_filename = 'cumberland_params_scenario_5.R'
+source_filename = 'cumberland_params_scenario_6.R'
 source(source_filename)
 
 user_simulation_params = initialise_user_simulation_params()

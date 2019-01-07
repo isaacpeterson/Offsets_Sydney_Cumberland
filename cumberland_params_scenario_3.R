@@ -19,16 +19,20 @@ initialise_user_global_params <- function(){
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
+  # What subset of features to use in the simulation
+  # Need to keep these as is to use veg integrity score
+  
+  global_params$features_to_use_in_simulation = 1:5
+  
   global_params$store_zeros_as_sparse = TRUE
   
   # set to FALSE if running into memory troubles when collating
-  global_params$collate_with_parallel_cores = FALSE
-  
+  global_params$collate_with_parallel_cores = TRUE
   # The number of cores to run on.
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 12
+  global_params$realisation_num = 2
   
   global_params$save_simulation_outputs = TRUE
   
@@ -48,7 +52,7 @@ initialise_user_global_params <- function(){
   global_params$overwrite_offset_probability_list = FALSE
   global_params$overwrite_unregulated_probability_list = FALSE
   
-  global_params$overwrite_site_features = TRUE
+  global_params$overwrite_site_features = FALSE
   
   # If building all inputs from scratch via the initialise_cumberland_data.R,
   # then these need to be set to TRUE for the first run, to generate the
@@ -77,10 +81,6 @@ initialise_user_simulation_params <- function(){
   # gets set to this number - set to zero to turn off. Be careful as this is
   # dependant on the total number of parcels.
   simulation_params$unregulated_loss_prob = 0.001
-  
-  # What subset of features to use in the simulation
-  # Need to keep these as is to use veg integrity score
-  simulation_params$features_to_use_in_simulation = 1:5
   
   # The total number of layers to use in the offset calcuation (iterating from the start)
   # Need to keep these as is to use veg integrity score
