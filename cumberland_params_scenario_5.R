@@ -64,7 +64,8 @@ initialise_user_global_params <- function(){
   global_params$overwrite_feature_dynamics = FALSE
   global_params$overwrite_condition_classes = FALSE
   global_params$build_background_cfacs = FALSE
-  
+  global_params$save_background_cfacs = TRUE
+  global_params$background_cfacs_file = paste0(global_params$simulation_folder, 'simulation_inputs/background_cfacs_tmp.rds')
   return(global_params)
 }
 
@@ -75,7 +76,7 @@ initialise_user_simulation_params <- function(){
   simulation_params = list()
   
   # How long to run the simulaton in years
-  simulation_params$time_steps = 37 # 50
+  simulation_params$time_steps = 5 # 50
   
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
@@ -114,7 +115,6 @@ initialise_user_simulation_params <- function(){
   
   # Removing the very largest parcels in the top 0.1% of the size distribution.
   simulation_params$max_site_screen_size_quantile = 0.999
-  
   
   #   c('net_gains', 'restoration_gains', 'avoided_condition_decline', 'avoided_loss',
   #     'protected_condition', 'current_condition', 'restored_condition')

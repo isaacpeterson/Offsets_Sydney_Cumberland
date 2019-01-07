@@ -1,6 +1,6 @@
 library(offsetsim)
 
-source_filename = 'cumberland_params_scenario_6.R'
+source_filename = 'cumberland_params_scenario_5.R'
 source(source_filename)
 
 user_simulation_params = initialise_user_simulation_params()
@@ -13,6 +13,8 @@ osim.run(user_global_params, user_simulation_params, user_feature_params, user_t
 cat('\nosim.run() completed - generating outputs\n')
 
 simulation_folder = find_current_run_folder(user_global_params$simulation_folder)
+
+osim.collate(user_output_params, simulation_folder)
 
 osim.output(user_output_params, simulation_folder)
 
