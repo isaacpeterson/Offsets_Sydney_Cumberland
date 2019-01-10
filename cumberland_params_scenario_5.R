@@ -211,14 +211,14 @@ user_transform_function <- function(pool_vals, transform_params){
 
 
 
-initialise_user_feature_params <- function(){
+initialise_user_feature_params <- function(current_author_sheet_data){
   
-  current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds') # works
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkeith_splines.rds') # works
+  current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds') # works
+  #current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_dkeith_splines.rds') # works
   
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds')
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_pprice_splines.rds')
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
+  #current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds')
+  #current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_pprice_splines.rds')
+  #current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
   
   feature_params = list()
   feature_params$scale_features = FALSE
@@ -255,10 +255,10 @@ initialise_user_feature_params <- function(){
   #the time over which the experts defined the curves
   
   feature_params$simulated_time_vec = 0:80
-  #   full_dynamics_set = lapply(seq_along(current_author_splines),  
-  #                              function(i) lapply(seq_along(current_author_splines[[i]]), 
-  #                                                 function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
-  #                                                                    function(k) predict(current_author_splines[[i]][[j]][[k]], 
+  #   full_dynamics_set = lapply(seq_along(current_author_sheet_data),  
+  #                              function(i) lapply(seq_along(current_author_sheet_data[[i]]), 
+  #                                                 function(j) lapply(seq_along(current_author_sheet_data[[i]][[j]]), 
+  #                                                                    function(k) predict(current_author_sheet_data[[i]][[j]][[k]], 
   #                                                                                        feature_params$simulated_time_vec)$y)))
   
   # full_dynamics_set is a list of vectors for each of the expert curves
@@ -269,10 +269,10 @@ initialise_user_feature_params <- function(){
   # i look: lifeform: grass, trees etc
   
   
-  full_dynamics_set = lapply(seq_along(current_author_splines),  
-                             function(i) lapply(seq_along(current_author_splines[[i]]), 
-                                                function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
-                                                                   function(k) current_author_splines[[i]][[j]][[k]](feature_params$simulated_time_vec))))
+  full_dynamics_set = lapply(seq_along(current_author_sheet_data),  
+                             function(i) lapply(seq_along(current_author_sheet_data[[i]]), 
+                                                function(j) lapply(seq_along(current_author_sheet_data[[i]][[j]]), 
+                                                                   function(k) current_author_sheet_data[[i]][[j]][[k]](feature_params$simulated_time_vec))))
   
   # This is just reordering the best upper and lower bound
   full_dynamics_set = lapply(seq_along(full_dynamics_set),  
