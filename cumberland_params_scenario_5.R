@@ -3,7 +3,7 @@ initialise_user_global_params <- function(){
   global_params = list()
   
   global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
+  #global_params$simulation_folder = '/mnt/offset_data/Sydney_Cumberland_Data/')
   
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
