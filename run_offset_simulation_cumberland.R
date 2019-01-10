@@ -14,8 +14,6 @@ cat('\nosim.run() completed - generating outputs\n')
 
 simulation_folder = find_current_run_folder(user_global_params$simulation_folder)
 
-osim.collate(user_output_params, simulation_folder)
-
 osim.output(user_output_params, simulation_folder)
 
 cat('\n simulation and outputs using', source_filename, 'completed \n')

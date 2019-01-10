@@ -24,6 +24,9 @@ initialise_user_global_params <- function(){
   
   global_params$features_to_use_in_simulation = 1:5
   
+  # How long to run the simulaton in years
+  global_params$time_steps = 5 # 50
+  
   global_params$store_zeros_as_sparse = TRUE
   
   # set to FALSE if running into memory troubles when collating
@@ -32,7 +35,7 @@ initialise_user_global_params <- function(){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 2
+  global_params$realisation_num = 1
   
   global_params$save_simulation_outputs = TRUE
   
@@ -65,7 +68,7 @@ initialise_user_global_params <- function(){
   global_params$overwrite_condition_classes = FALSE
   global_params$build_background_cfacs = FALSE
   global_params$save_background_cfacs = TRUE
-  global_params$background_cfacs_file = paste0(global_params$simulation_folder, 'simulation_inputs/background_cfacs_tmp.rds')
+
   return(global_params)
 }
 
@@ -75,15 +78,10 @@ initialise_user_simulation_params <- function(){
   
   simulation_params = list()
   
-  # How long to run the simulaton in years
-  simulation_params$time_steps = 5 # 50
-  
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
   # dependant on the total number of parcels.
   simulation_params$unregulated_loss_prob = 0.001
-  
-
   
   # The total number of layers to use in the offset calcuation (iterating from the start)
   # Need to keep these as is to use veg integrity score
@@ -168,12 +166,13 @@ initialise_user_simulation_params <- function(){
   simulation_params$banked_offset_selection_type = 'pre_determined'  
   simulation_params$development_selection_type = 'stochastic'  
   
-  banked_offset_control = vector('list', simulation_params$time_steps)
-  banked_offset_control[1:simulation_params$time_steps] = array(0, simulation_params$time_steps)
+  simulated_time_steps = 5
+  banked_offset_control = vector('list', simulated_time_steps)
+  banked_offset_control[1:simulated_time_steps] = array(0, simulated_time_steps)
   banked_offset_control[[1]] = 4e5:8e5
   simulation_params$banked_offset_control = list(banked_offset_control)
 
-  simulation_params$development_control = list(build_stochastic_intervention(simulation_params$time_steps, 
+  simulation_params$development_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                              intervention_start = 1, 
                                                                              intervention_end = 37, 
                                                                              intervention_num = 3789, 
