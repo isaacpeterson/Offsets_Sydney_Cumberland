@@ -111,10 +111,10 @@ overwrite_site_characteristics = FALSE
 
 
 # Isaac's locations 
-data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/cumberland_aligned_tif/')
-output_data_folder = '/Users/E24661/offset_data/Sydney_Cumberland_Data/prepared_data/'
-data_attribute_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/veg_attributes/')
-simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs/')
+data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/final_rasters/')
+output_data_folder = '/Users/E24661/offset_data/Sydney_Cumberland_Data/new_prepared_data/'
+data_attribute_folder = data_folder
+simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_new/')
 
 # Ascelin's locations 
 # data_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/cumberland_aligned_tif/')
@@ -122,38 +122,32 @@ simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberl
 # data_attribute_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/veg_attributes/')
 # simulation_inputs_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/testing3/simulation_inputs_folder/')
 
-# These are the names of the excel files which contain the detailed veg
-# mapping by BIOSIS in the PGAs. These are the attributed tables of veg
-# mapping done by BIOSIS provided as shape files.
-# I think these are the shapefiles in the following: <>Sydney_Cumberland_Data/Projected_Cumberland_data/projected_macarthur.shp etc
-priority_data_att_files = c('mac_veg_att', 'west_veg_att', 'wilton_veg_att')
 
-# These are the raster tif files that match each of the files defined in
-# priority_data_att_files. This is a rasterised version of the shape files and
-# priority_data_att_files is a excel file of the attribute table.
-priority_data_filenames = c("mac_veg_rst_exprt.tif", "west_veg_rst_exprt.tif", "wilt_veg_rst_exprt.tif")
-
-# Makes a raster stack of 4 layers: the Biosis veg mapping from the 3 PGAs
-# (mac_veg_rst_exprt.tif, west_veg_rst_exprt.tif, wilt_veg_rst_exprt.tif), as
-# well as cum_ID_rast1.tif, which is currently the cumberland West veg data,
-# but needs to have the Sydney Metro veg data added to it.
-
-feature_ID_layers = offsetsim::load_rasters(paste0(data_folder, c(priority_data_filenames, "cum_ID_rast1.tif")), features_to_use = 'all')
-
-# Convert the stack of 4 layers to a list of arrays, turning NAs to zeros.
-# The values in the array represent the IDs for each polygon of Veg
-feature_ID_layers = lapply(seq(dim(feature_ID_layers)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_layers, i)))
-
-# Raster layer with the parcel ID in each pixel. 
-# Note that raster_to_array also removes all NAs and turns them into zeros.
-cadastre = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder, "cad_rst_exprt.tif"), features_to_use = 'all'))
 
 # Defines the study area and excludes parcels outside the study region. This
 # could be used to exclude additional areas from the analysis. Note for now all parcels are includeds.
-cadastre_msk = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder, "cum_sub_rst_exprt.tif"), features_to_use = 'all'))
+cad_msk_filename = paste0(data_folder, "cumberland_studyarea.tif")
+cad_msk_raster = offsetsim::load_rasters(cad_msk_filename, features_to_use = 'all')
+cadastre_msk = offsetsim::raster_to_array(cad_msk_raster)
 
-# This should be a 0/1 raster that define the PGAs.
-PGA_msk = offsetsim::raster_to_array(offsetsim::load_rasters(paste0(data_folder,"priority_rast_exprt.tif"), features_to_use = 'all')) > 0
+# Raster layer with the parcel ID in each pixel. 
+# Note that raster_to_array also removes all NAs and turns them into zeros.
+
+
+data_filenames = setdiff(list.files(path = data_folder, pattern = ".tif", all.files = FALSE, include.dirs = FALSE, no.. = FALSE), 
+                         list.files(path = data_folder, pattern = ".tif.", all.files = FALSE, include.dirs = FALSE, no.. = FALSE))
+
+cadastre_filename = "cadastre_segmented_final.tif"
+cadastre_ind = which(data_filenames == cadastre_filename)
+
+data_rasters = setNames(lapply(seq_along(data_filenames), 
+                               function(i) offsetsim::load_rasters(paste0(data_folder, data_filenames[i]), features_to_use = 'all')), data_filenames)
+
+data_rasters[[cadastre_ind]] = crop(data_rasters[[cadastre_ind]], 
+                                    data_rasters[[which(data_filenames == "cumberland_studyarea.tif")]])
+
+data_arrays = setNames(lapply(seq_along(data_filenames), function(i) offsetsim::raster_to_array(data_rasters[[i]])), data_filenames)
+
 
 # Build the site characteristics object. Contains the info the simulation to
 # assign pixel values to appropriate parcel and vegetation polygons. This
@@ -162,35 +156,16 @@ if (file.exists(paste0(simulation_inputs_folder, 'site_characteristics.rds')) & 
   site_characteristics = readRDS(paste0(simulation_inputs_folder, 'site_characteristics.rds'))
 } else {
   cat('\nBuilding site_characteristics...')
-  cadastre_array = cadastre*cadastre_msk 
-  site_characteristics = offsetsim::build_site_characteristics(cadastre_array)
+  site_characteristics = offsetsim::build_site_characteristics(data_arrays[[cadastre_ind]])
   saveRDS(object = site_characteristics, file = paste0(simulation_inputs_folder, 'site_characteristics.rds'))
   cat('\nWrote site_characteristics.rds')
 }
 
-browser()
-
-# Note - the two masks dont perfectly overlap - hence enforce cadastre msk boundaries - otherwise redefine cadastre_msk in ARCGIS
-# Set to zero any areas that zero in either layer.
-
-# note there were some bits of the PGAs that went slightly outside the study
-# area so might need to deal with this if don't want to exclude some small
-# areas of the PGA.
-
-PGA_msk = PGA_msk * cadastre_msk
-
-dev_msk = PGA_msk * cadastre_msk
-
-
-# Note - the two masks dont perfectly overlap - hence enforce cadastre msk boundaries - otherwise redefine cadastre_msk in ARCGIS
-# Set to zero any areas that zero in either layer.
-# Note: if I want exclude exisiting conservation areas for offsets, I would add them in here. 
-offset_region = ((1 - dev_msk)*cadastre_msk)
-
-unregulated_loss_region = cadastre_msk
-
-objects_to_save = list()
-
+# This is a list of length n, where n is the total number of parcels as define
+# in "cad_rst_exprt.tiff".  The IDs in this layer extrated via uique and sort,
+# and then renumbered starting from zero. Thus the ID of parcels to remove
+# need to mapped to correspond to this. 
+# Each element of the list is a single number.
 
 # Note: all Site IDs are integers. The code above, finds all unique integes
 # and gives then an ID starting from 1. However NAs have all gone to zero
@@ -198,41 +173,53 @@ objects_to_save = list()
 # remove them from the analysis as these aren't used. This is why
 # site_indexes_to_exclude is set to "1" below.
 
-# This line of code excludes site index "1" as the current setup rewrites zeros for NA vals in
-# cadastre array, resulting in the NA's being listed as "0", and
-# correspondingly  the first site is given all of these elements.
+objects_to_save = list()
+objects_to_save$dev_probability_list = build_probability_list(priority_growth_msk, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
+objects_to_save$offset_probability_list = build_probability_list(offset_msk_strategic, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
+objects_to_save$offset_probability_list_phase0 = build_probability_list(offset_msk_phase0, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
 
-# If there are any other parcels that are to be excluded from development or offset regions,
-# just pass in a vector of parcel IDs as the site_indexes_to_exclude parameter
-# of this function call
-
-# This is a list of length n, where n is the total number of parcels as define
-# in "cad_rst_exprt.tiff".  The IDs in this layer extrated via uique and sort,
-# and then renumbered starting from zero. Thus the ID of parcels to remove
-# need to mapped to correspond to this. 
-# Each element of the list is a single number.
-objects_to_save$dev_probability_list = build_probability_list(dev_msk, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
-objects_to_save$offset_probability_list = build_probability_list(offset_region, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
-objects_to_save$unregulated_probability_list = build_probability_list(unregulated_loss_region, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
 
 # Save the objects the output folder, save to file with the same name as the sublists (eg dev_probability_list)
 offsetsim::save_simulation_inputs(objects_to_save, output_data_folder)
+
+#### NOTES:
+
+### 1) cadastre_msk should be composed of 1 and NA instead of 0
+### 2) all extents should match i.e. cumberland_studyarea should match cadastre_segmented_final
+### 3) when setting extent(cumberland_studyarea) = extent(cadastre_segmented_final) is appears that the projections do not match - are they sampled at the same resolution?
+### 4) is there a separate "well characterised" layer or do we separate by PGA region mask?
+### 5) is Sydney Metro added?
+
+
+
+# These are the names of the excel files which contain the detailed veg
+# mapping by BIOSIS in the PGAs. These are the attributed tables of veg
+# mapping done by BIOSIS provided as shape files.
+
+priority_data_att_files = c('new_Vegetation_CumberlandPlain')
+priority_data_attributes = vector('list', length(priority_data_att_files)) #vector of type list
+
+# Read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
+for (data_ind in seq_along(priority_data_att_files)){
+  current_veg = priority_data_att_files[data_ind]
+  priority_data_attributes[[data_ind]] = read.xls(paste0(data_attribute_folder, priority_data_att_files[data_ind], '.xls'))
+}
+
+# These are the raster tif files that match each of the files defined in
+# priority_data_att_files. This is a rasterised version of the shape files and
+# priority_data_att_files is a excel file of the attribute table.
+priority_data_filenames = c("vegetation/new_Vegetation_CumberlandPlain.tif")
+
+feature_ID_rasters = offsetsim::load_rasters(paste0(data_folder, priority_data_filenames), features_to_use = 'all')
+
+# Convert the feature_ID_rasters stack to a list of arrays, turning NAs to zeros.
+# The values in the array represent the IDs for each polygon of Veg
+feature_ID_layers = lapply(seq(dim(feature_ID_rasters)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_rasters, i)))
 
 
    #------------------------------
    # Initialize the veg condition 
    #------------------------------
-
-
-data_num = length(priority_data_att_files)
-priority_data_attributes = vector('list', data_num) #vector of type list
-
-# Read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
-for (data_ind in seq(data_num)){
-  current_veg = priority_data_att_files[data_ind]
-  priority_data_attributes[[data_ind]] = read.xls(paste0(data_attribute_folder, priority_data_att_files[data_ind], '.xls'))
-}
-
 
 # This selects a subset priority_data_attributes that only contain the 'PCT', 'Condition', 'Shape_Area'.
 priority_condition_att = lapply(seq_along(priority_data_attributes), 
@@ -405,10 +392,10 @@ for (data_ind in seq_along(data_attributes)){
 
     if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
       # outside PGAs so use sampled data
-      current_feature = current_feature*(1 - PGA_msk)
+      current_feature = current_feature*(1 - priority_growth_msk)
     } else {
       # Use Biosis data
-      current_feature = current_feature*PGA_msk
+      current_feature = current_feature*priority_growth_msk
     }
     condition_class_set[[data_ind]][[PCT_ind]] = current_feature
 
@@ -483,9 +470,9 @@ for (data_ind in seq_along(data_attributes)){
                                             means_modifier)
       
       if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
-        current_feature = current_feature*(PGA_msk == 0)
+        current_feature = current_feature*(priority_growth_msk == 0)
       } else {
-        current_feature = current_feature*PGA_msk
+        current_feature = current_feature*priority_growth_msk
       }
       
       condition_vals_set[[data_ind]][[PCT_ind]][[feature_ind]] = current_feature

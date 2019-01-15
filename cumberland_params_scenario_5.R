@@ -3,7 +3,7 @@ initialise_user_global_params <- function(){
   global_params = list()
   
   global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  #global_params$simulation_folder = '/mnt/offset_data/Sydney_Cumberland_Data/')
+  #global_params$simulation_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
   
   global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
                                               (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
@@ -25,7 +25,7 @@ initialise_user_global_params <- function(){
   global_params$features_to_use_in_simulation = 1:5
   
   # How long to run the simulaton in years
-  global_params$time_steps = 5 # 50
+  global_params$time_steps = 15 # 50
   
   global_params$store_zeros_as_sparse = TRUE
   
@@ -35,7 +35,7 @@ initialise_user_global_params <- function(){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 1
+  global_params$realisation_num = 2
   
   global_params$save_simulation_outputs = TRUE
   
@@ -87,7 +87,7 @@ initialise_user_simulation_params <- function(){
   # Need to keep these as is to use veg integrity score
   simulation_params$features_to_use_in_offset_calc = 1:5
   
-  # Speifies what is affected by the offset intervention
+  # Specifies what is affected by the offset intervention
   # Need to keep these as is to use veg integrity score
   simulation_params$features_to_use_in_offset_intervention = 1:5
   
@@ -166,7 +166,7 @@ initialise_user_simulation_params <- function(){
   simulation_params$banked_offset_selection_type = 'pre_determined'  
   simulation_params$development_selection_type = 'stochastic'  
   
-  simulated_time_steps = 5
+  simulated_time_steps = 15
   banked_offset_control = vector('list', simulated_time_steps)
   banked_offset_control[1:simulated_time_steps] = array(0, simulated_time_steps)
   banked_offset_control[[1]] = 4e5:8e5
@@ -350,6 +350,9 @@ initialise_user_output_params <- function(){
   # if leave it as an empty vec will put in the the collated realizations
   # folder, otherwise you specify the path
   output_params$output_folder = vector() 
+  output_params$output_type = 'plot' # set to 'raster', 'png', 'plot', or 'csv'
+  
+  output_params$write_pdf = TRUE
   
   output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts'
   
@@ -359,7 +362,7 @@ initialise_user_output_params <- function(){
   
   # the dev-offset to plot for the site level results.
   output_params$sets_to_plot = 1
-  output_params$plot_site = TRUE
+  output_params$plot_site = FALSE
   output_params$plot_program = TRUE
   output_params$plot_landscape = TRUE
   
@@ -367,10 +370,7 @@ initialise_user_output_params <- function(){
   output_params$plot_offset_metric = TRUE
   
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
-  
-  output_params$write_pdf = FALSE
-  output_params$output_type = 'png' # set to 'raster', 'png', 'plot', or 'csv'
-  
+
   # was originally done 
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
   output_params$plot_subset_param = 'all' #c('maintain') # 'net_gains', 'restore', 15
@@ -390,14 +390,14 @@ initialise_user_output_params <- function(){
   output_params$ny = 6
   
   #set of nested lists by scenario and feature (which in this case is 5)
-  output_params$site_outcome_plot_lims_set = list(rep(list(c(0, 1e2)), 5))
-  output_params$program_outcome_plot_lims_set = list(rep(list(c(0e6, 1e5))), 5)
-  output_params$landscape_outcome_plot_lims_set = list(rep(list(c(0, 2e5))))
+  output_params$site_outcome_plot_lims_set = list(rep(list(c(0, 3e2)), 5))
+  output_params$program_outcome_plot_lims_set = list(rep(list(c(0e6, 5e6))), 5)
+  output_params$landscape_outcome_plot_lims_set = list(rep(list(c(0, 5e6))))
   
   #set of nested lists by scenario and feature (which in this case is 5)
   output_params$site_impact_plot_lims_set = list(list(c(-1e2, 1e2), c(-1e2, 1e2), c(-1e2, 1e2), c(-5e2, 5e2), c(-5e2, 5e2), c(-5e2, 5e2)))
-  output_params$program_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5))) 
-  output_params$landscape_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-1e5, 1e5), c(-1e5, 1e5), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6)))
+  output_params$program_impact_plot_lims_set = list(list(c(-5e6, 5e6), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-5e6, 5e6), c(-5e6, 5e6))) 
+  output_params$landscape_impact_plot_lims_set = list(list(c(-1e6, 1e6), c(-1e5, 1e5), c(-1e5, 1e5), c(-1e6, 1e6), c(-1e6, 1e6), c(-5e6, 5e6)))
   
   # write the raw condition value to file if fase, otherwise write the rescaled values as per the colour ramps below.
   output_params$map_vals = TRUE
