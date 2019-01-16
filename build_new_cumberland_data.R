@@ -328,6 +328,7 @@ cumberland_conditions = vector(mode ="character", length(cumberland_att$shape_ar
 for (site_ind in seq_along(cumberland_att$shape_area)){
   # see if this is a polygon of veg is one the relevant PCTs
   if (cumberland_att$PCT[site_ind] %in% build_params$PCT_to_use){
+    
     # data frame with with polygons from the PGAs, of the current cut category within the PCT
     current_priority_stats = as.data.frame(table(priority_cuts_by_PCT[[match(cumberland_att$PCT[site_ind], build_params$PCT_to_use)]][[cumberland_cuts[site_ind]]]))
     # check if there are enough polygons to sample from
@@ -344,22 +345,22 @@ for (site_ind in seq_along(cumberland_att$shape_area)){
     # Here we are one of the PCTs not in PCT_to_use, in this case sample from all the data.89
     current_priority_stats = full_priority_cut_stats[[cumberland_cuts[site_ind]]]
     # This is the sampling to determine the condition class
-    if (sum(current_priority_stats$Freq) > 0){
-      current_sampled_condition_index = sample(x = seq_along(current_priority_stats$Freq), size = 1, 
-                                               prob = current_priority_stats$Freq/sum(current_priority_stats$Freq), replace = TRUE)
-    } else {
-      print('poor cut parametrisation flag')
-    }
-    # This builds a data attributes list that matches the condition_class_vlas
-    # Storing the condition class based on what is in condition_class_vals above (eg in tact, scattered trees et)
+    
   }
+  
+  if (sum(current_priority_stats$Freq) > 0){
+    current_sampled_condition_index = sample(x = seq_along(current_priority_stats$Freq), size = 1, 
+                                             prob = current_priority_stats$Freq/sum(current_priority_stats$Freq), replace = TRUE)
+  } else {
+    print('poor cut parametrisation flag')
+  }
+  # This builds a data attributes list that matches the condition_class_vlas
+  # Storing the condition class based on what is in condition_class_vals above (eg in tact, scattered trees et)
   
   # building a vector of names, based on the sampled conditon value of each polygon
   # Note "Var1" is from R's table() function call above.
   cumberland_conditions[site_ind] = as.character(current_priority_stats$Var1[current_sampled_condition_index])
 }
-
-
 
 # assign all the new sampled condition classes to attribute table of the cumberland plain veg shape file (that did not originally have veg data)
 cumberland_att$condition = cumberland_conditions
@@ -369,9 +370,6 @@ data_attributes = append(priority_data_attributes, list(cumberland_att))
 
 # sets the list names to match the veg layers
 names(data_attributes) = c(build_params$priority_data_att_filenames, 'cumberland_att')
-
-
-
 
 
 # ----------------------
@@ -417,9 +415,13 @@ for (data_ind in seq_along(data_attributes)){
     condition_class_set[[data_ind]][[PCT_ind]] = current_feature
     
   }
+  
   paste0('data attribute ', data_ind, ' completed')
+  
 }
 
+
+  
 paste0('condition classes built at ',
        round(difftime(Sys.time(), sim_time), 1), 
        units(difftime(Sys.time(), sim_time)))
@@ -505,13 +507,7 @@ for (data_ind in seq_along(data_attributes)){
 }
 
 
-current_ID_array = feature_ID_layers[[data_ind]]
-current_data_attributes = data_attributes[[data_ind]] 
-current_condition_class_set = current_data_attributes$condition[PCT_set_to_use] 
-current_object_ID_set = current_data_attributes$object_ID[PCT_set_to_use]
-current_feature = matrix(0, dim(current_ID_array)[1], dim(current_ID_array)[2])
-
-
+  
 
 
 paste0('condition values built at ',

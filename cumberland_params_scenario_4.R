@@ -1,29 +1,30 @@
 # offsets occur over simulation in strategic area, low intensity management
 
-initialise_user_global_params <- function(){
+initialise_user_global_params <- function(folder_to_use){
   
   global_params = list()
   
-  global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
+  simulation_base_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  #global_params$simulation_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
+  global_params$simulation_folder = paste0(simulation_base_folder, folder_to_use, '/')
   
-  global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
-                                              (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
+  global_params$feature_raster_files = paste0(simulation_base_folder, 'simulation_inputs/', 
+                                              (list.files(path = paste0(simulation_base_folder, 'simulation_inputs/'),
                                                           pattern = 'PCT_849_feature_', all.files = FALSE, 
                                                           full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                           include.dirs = FALSE, no.. = FALSE)))
   
-  global_params$planning_units_raster = paste0(global_params$simulation_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
+  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
   
-  global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
+  global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs/', 
                                                       (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
                                                                   pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
-  # What subset of features to use in the simulation
-  # Need to keep these as is to use veg integrity score
+  global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'simulation_inputs/')
   
+  global_params$time_steps = 37
   global_params$features_to_use_in_simulation = 1:5
   
   global_params$store_zeros_as_sparse = TRUE
@@ -72,12 +73,9 @@ initialise_user_global_params <- function(){
 
 
 
-initialise_user_simulation_params <- function(){ 
+initialise_user_simulation_params <- function(simulated_time_steps){ 
   
   simulation_params = list()
-  
-  # How long to run the simulaton in years
-  simulation_params$time_steps = 37 # 50
   
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
@@ -169,15 +167,15 @@ initialise_user_simulation_params <- function(){
   
   # calculate offset parcels in offset region and substitute for intervention_num = 50e3
   
-  simulation_params$banked_offset_control = list(build_stochastic_intervention(simulation_params$time_steps, 
+  simulation_params$banked_offset_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                           intervention_start = 1, 
-                                                                          intervention_end = 37, 
+                                                                          intervention_end = simulated_time_steps, 
                                                                           intervention_num = 50e3, 
                                                                           sd = 1))
    
-  simulation_params$development_control = list(build_stochastic_intervention(simulation_params$time_steps, 
+  simulation_params$development_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                         intervention_start = 1, 
-                                                                        intervention_end = 37, 
+                                                                        intervention_end = simulated_time_steps, 
                                                                         intervention_num = 3789, 
                                                                         sd = 1))
   
@@ -214,14 +212,7 @@ user_transform_function <- function(pool_vals, transform_params){
 
 
 
-initialise_user_feature_params <- function(){
-  
-  current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds') # works
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkeith_splines.rds') # works
-  
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds')
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_pprice_splines.rds')
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
+initialise_user_feature_params <- function(current_author_splines){
   
   feature_params = list()
   feature_params$scale_features = FALSE

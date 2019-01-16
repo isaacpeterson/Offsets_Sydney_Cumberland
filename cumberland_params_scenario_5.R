@@ -1,26 +1,28 @@
 # offsets occur at simulation initialisation, high intensity management
 
-initialise_user_global_params <- function(){
+initialise_user_global_params <- function(folder_to_use){
   
   global_params = list()
-  
-  global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+
+  simulation_base_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
   #global_params$simulation_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
+  global_params$simulation_folder = paste0(simulation_base_folder, folder_to_use, '/')
   
-  global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
-                                              (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
+  global_params$feature_raster_files = paste0(simulation_base_folder, 'simulation_inputs/', 
+                                              (list.files(path = paste0(simulation_base_folder, 'simulation_inputs/'),
                                                           pattern = 'PCT_849_feature_', all.files = FALSE, 
                                                           full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                           include.dirs = FALSE, no.. = FALSE)))
   
-  global_params$planning_units_raster = paste0(global_params$simulation_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
+  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
   
-  global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
+  global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs/', 
                                                       (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
                                                                   pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
+  global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'simulation_inputs/')
   # What subset of features to use in the simulation
   # Need to keep these as is to use veg integrity score
   
@@ -76,7 +78,7 @@ initialise_user_global_params <- function(){
 
 
 
-initialise_user_simulation_params <- function(){ 
+initialise_user_simulation_params <- function(simulated_time_steps){ 
   
   simulation_params = list()
   
@@ -168,7 +170,6 @@ initialise_user_simulation_params <- function(){
   simulation_params$banked_offset_selection_type = 'pre_determined'  
   simulation_params$development_selection_type = 'stochastic'  
   
-  simulated_time_steps = 15
   banked_offset_control = vector('list', simulated_time_steps)
   banked_offset_control[1:simulated_time_steps] = array(0, simulated_time_steps)
   banked_offset_control[[1]] = 4e5:8e5
@@ -176,7 +177,7 @@ initialise_user_simulation_params <- function(){
 
   simulation_params$development_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                              intervention_start = 1, 
-                                                                             intervention_end = 37, 
+                                                                             intervention_end = simulated_time_steps, 
                                                                              intervention_num = 3789, 
                                                                              sd = 1))
   
@@ -213,14 +214,7 @@ user_transform_function <- function(pool_vals, transform_params){
 
 
 
-initialise_user_feature_params <- function(current_author_sheet_data){
-  
-  current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds') # works
-  #current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_dkeith_splines.rds') # works
-  
-  #current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds')
-  #current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_pprice_splines.rds')
-  #current_author_sheet_data = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
+initialise_user_feature_params <- function(current_author_splines){
   
   feature_params = list()
   feature_params$scale_features = FALSE
@@ -354,11 +348,11 @@ initialise_user_output_params <- function(){
   # if leave it as an empty vec will put in the the collated realizations
   # folder, otherwise you specify the path
   output_params$output_folder = vector() 
-  output_params$output_type = 'plot' # set to 'raster', 'png', 'plot', or 'csv'
+  output_params$output_type = 'csv' # set to 'raster', 'png', 'plot', or 'csv'
   
   output_params$write_pdf = TRUE
   
-  output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts'
+  output_params$plot_type = 'outcomes' # can be 'outcomes'  or 'impacts'
   
   # use 'all' for all or therwise the numern eg 6 means the first 6 realiztaions.
   

@@ -1,25 +1,25 @@
 library(offsetsim)
 
-source_filename = 'cumberland_params_scenario_5.R'
-source(source_filename)
+scenario_num = 1
 
-user_simulation_params = initialise_user_simulation_params()
-user_global_params = initialise_user_global_params()
+source(paste0('cumberland_params_scenario_', scenario_num, '.R'))
+
+
 user_output_params <- initialise_user_output_params()
 
-# author_names = c('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds', 
-#                  'REVISED_Elicitation_CP_Workshop_dkeith_splines.rds', 
-#                  'REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds', 
-#                  'REVISED_Elicitation_CP_Workshop_pprice_splines.rds', 
-#                  'REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
+author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
 
-author_names = 'mean_splines.rds'
+# author_names = 'mean_splines.rds'
 author_sheet_data = lapply(seq_along(author_names), 
-                                   function(i) readRDS(author_names[i])) 
+                                   function(i) readRDS(paste0('REVISED_Elicitation_CP_Workshop_', author_names[i], '_splines.rds'))) 
 
 for (i in seq_along(author_names)){
   
-  user_feature_params = initialise_user_feature_params(author_sheet_data[i])
+  user_feature_params = initialise_user_feature_params(author_sheet_data[[i]])
+  folder_to_use = paste0(author_names[i], '/scenario_', scenario_num)
+  user_global_params = initialise_user_global_params(folder_to_use)
+  user_simulation_params = initialise_user_simulation_params(simulated_time_steps = user_global_params$time_steps)
+  
   osim.run(user_global_params, user_simulation_params, user_feature_params, user_transform_function, loglevel = 'TRACE')
   simulation_folder = find_current_run_folder(user_global_params$simulation_folder)
   osim.output(user_output_params, simulation_folder)
