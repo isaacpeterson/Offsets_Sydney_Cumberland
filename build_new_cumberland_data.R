@@ -17,7 +17,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
     current_feature = vector()
   } else {
     browser()
-    current_condition_class_set = data_attributes[[data_ind]]$Condition[PCT_set_to_use] 
+    current_condition_class_set = data_attributes[[data_ind]]$condition[PCT_set_to_use] 
     current_object_ID_set = data_attributes[[data_ind]]$OBJECTID[PCT_set_to_use]
     
     current_feature = matrix(0, dim(current_ID_array)[1], dim(current_ID_array)[2])
@@ -28,7 +28,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
       current_element_set = which(current_ID_array %in% current_object_ID_set[ID_ind])
       current_condition_class_mode = as.numeric(condition_class_vals[, 2][ match(current_condition_class_set[ID_ind], condition_class_vals[, 1]) ])
       
-      if (feature_type == 'Condition_Class'){
+      if (feature_type == 'condition_Class'){
         #make the condition class layer (each polygon of veg is composed of elements with the same value)
         current_element_vals = rep(current_condition_class_mode, length(current_element_set))
         browser()
@@ -115,7 +115,7 @@ build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/S
 
 # This is how the parcel size sampling is done Specify area size classes for
 # sampling condition. If want to use different size classes, change this vector.
-# This is based on the freq distribution of the Shape_Area values for each PGA
+# This is based on the freq distribution of the shape_area values for each PGA
 build_params$area_cuts_to_use = c(0, 1e4, 2e4, 3e4, 6e4, 7e4, 8e4, 9e4, Inf)
 
 # only use PCT 849
@@ -150,9 +150,9 @@ build_params$priority_data_filenames = paste0(build_params$data_folder, "All_Veg
 # mapping by BIOSIS in the PGAs. These are the attributed tables of veg
 # mapping done by BIOSIS provided as shape files.
 
-build_params$priority_data_att_filenames = c('All_Vegetation_CumberlandPlain')
+build_params$priority_data_att_filenames = c('AllVegetation_CumberlandPlain')
 
-cadastre_ind = which(build_params$data_filenames == "cadastre.tif")
+cadastre_ind = which(build_params$data_filenames == "cadastre_withconstraints.tif")
 
 GrowthAreas_ind = which(build_params$data_filenames == "GrowthAreas.tif")
 
@@ -202,6 +202,7 @@ if (build_params$run_build_site_characteristics == TRUE){
   }
 }
 
+
 # Note: all Site IDs are integers. The code above, finds all unique integes
 # and gives then an ID starting from 1. However NAs have all gone to zero
 # above and hence, all zero parcels will have a site index of "1". We want to
@@ -210,13 +211,12 @@ if (build_params$run_build_site_characteristics == TRUE){
 
 if (build_params$build_probability_list == TRUE){
   
-  objects_to_save = list()
   layer_names_to_use = matrix( ncol=2, byrow=TRUE, 
                                 c('GrowthAreas_DevFootprint.tif', 'dev_probability_list',
                                   'SelectedAReas_Draft_v1.tif', 'offset_probability_list',
                                   'Phase0Constraints.tif', 'offset_probability_list_phase0'))
 
-  probability_list = setNames(lapply(seq_along(layer_names_to_use), 
+  probability_list = setNames(lapply(seq(dim(layer_names_to_use)[1]), 
                                      function(i) calc_intervention_probability(data_arrays[[which(names(data_arrays) == layer_names_to_use[i, 1])]],
                                                                                site_characteristics$land_parcels, 
                                                                                site_indexes_to_exclude = 1)), 
@@ -224,7 +224,7 @@ if (build_params$build_probability_list == TRUE){
   
   # Save the objects the output folder, save to file with the same name as the sublists (eg dev_probability_list)
   if (build_params$save_probability_list == TRUE){
-    offsetsim::save_simulation_inputs(objects_to_save, build_params$simulation_inputs_folder)
+    offsetsim::save_simulation_inputs(probability_list, build_params$simulation_inputs_folder)
   }
 }
 
@@ -243,10 +243,6 @@ for (data_ind in seq_along(build_params$priority_data_att_filenames)){
 cumberland_ID_inds = which(priority_data_attributes[[1]]$object_ID %in% cumberland_layer_IDs)
 priority_IDs = setdiff(1:dim(priority_data_attributes[[1]])[1], cumberland_ID_inds)
 
-######### ARTIFICIALLY ADD SHAPE AREAS, REMOVE WHEN AREAS ARE PROVIDED
-priority_data_attributes[[1]]$Shape_Area = c(runif(n = 1000, min = 0, max = 3e4), 
-                                             runif(n = dim(priority_data_attributes[[1]])[1] - 1000, min = 5e4, max = 1e5))
-
 
 cumberland_att = priority_data_attributes[[1]][cumberland_ID_inds, ]
 priority_data_attributes[[1]] = priority_data_attributes[[1]][priority_IDs, ]
@@ -255,10 +251,10 @@ priority_data_attributes[[1]] = priority_data_attributes[[1]][priority_IDs, ]
    # Initialize the veg condition 
    #------------------------------
 
-# This selects a subset priority_data_attributes that only contain the 'PCT', 'Condition', 'Shape_Area'.
+# This selects a subset priority_data_attributes that only contain the 'PCT', 'condition', 'shape_area'.
 
 priority_condition_att = lapply(seq_along(priority_data_attributes), 
-                                function(i) priority_data_attributes[[i]][match(c('PCT', 'Condition', 'Shape_Area'), names(priority_data_attributes[[i]]))])
+                                function(i) priority_data_attributes[[i]][match(c('PCT', 'condition', 'shape_area'), names(priority_data_attributes[[i]]))])
 
 # makes one matrix of the data attributes. All priority areas are combined into one single matrix.
 priority_condition_set = do.call("rbind", priority_condition_att)
@@ -270,9 +266,9 @@ priority_cuts_by_PCT = vector('list', length(build_params$PCT_to_use))
 for (PCT_ind in seq_along(build_params$PCT_to_use)){
   current_PCT_set = (priority_condition_set$PCT == build_params$PCT_to_use[PCT_ind])
   
-  current_cuts = cut(priority_condition_set$Shape_Area[current_PCT_set], build_params$area_cuts_to_use, labels = labels_to_use)
+  current_cuts = cut(priority_condition_set$shape_area[current_PCT_set], build_params$area_cuts_to_use, labels = labels_to_use)
   
-  current_condition_set = priority_condition_set$Condition[current_PCT_set]
+  current_condition_set = priority_condition_set$condition[current_PCT_set]
   current_cut_set = vector('list', length(labels_to_use))
   
   for (cut_ind in seq_along(labels_to_use)){
@@ -285,7 +281,7 @@ for (PCT_ind in seq_along(build_params$PCT_to_use)){
 
 
 # Splits the data up via the specified cuts
-full_cuts = cut(priority_condition_set$Shape_Area, build_params$area_cuts_to_use, labels = labels_to_use)
+full_cuts = cut(priority_condition_set$shape_area, build_params$area_cuts_to_use, labels = labels_to_use)
 
 full_priority_cut_stats = vector('list', length(labels_to_use))
 
@@ -293,7 +289,7 @@ full_priority_cut_stats = vector('list', length(labels_to_use))
 cuts_to_remove = vector()
 
 for (cut_ind in seq_along(labels_to_use)){
-  full_priority_cut_stats[[cut_ind]] = as.data.frame(table(priority_condition_set$Condition[full_cuts == cut_ind]))
+  full_priority_cut_stats[[cut_ind]] = as.data.frame(table(priority_condition_set$condition[full_cuts == cut_ind]))
   if (sum(full_priority_cut_stats[[cut_ind]]$Freq) == 0){
     cuts_to_remove <- append(cuts_to_remove, cut_ind)
   }
@@ -304,8 +300,8 @@ if (length(cuts_to_remove) > 0){
   stop()
 }
 
-cumberland_cuts = as.numeric(cut(cumberland_att$Shape_Area, build_params$area_cuts_to_use, labels = labels_to_use))
-cumberland_conditions = vector(mode ="character", length(cumberland_att$Shape_Area))
+cumberland_cuts = as.numeric(cut(cumberland_att$shape_area, build_params$area_cuts_to_use, labels = labels_to_use))
+cumberland_conditions = vector(mode ="character", length(cumberland_att$shape_area))
 
 # For the current polygon of the given PCT of a given area, check if there are
 # more than min_data_count entries to create the distriubtion to sample from
@@ -319,7 +315,7 @@ min_data_count = 50
 # classes in the PGAs
 
 
-for (site_ind in seq_along(cumberland_att$Shape_Area)){
+for (site_ind in seq_along(cumberland_att$shape_area)){
   # see if this is a polygon of veg is one the relevant PCTs
   if (cumberland_att$PCT[site_ind] %in% build_params$PCT_to_use){
     # data frame with with polygons from the PGAs, of the current cut category within the PCT
@@ -357,7 +353,7 @@ for (site_ind in seq_along(cumberland_att$Shape_Area)){
 
 
 # assign all the new sampled condition classes to attribute table of the cumberland plain veg shape file (that did not originally have veg data)
-cumberland_att$Condition = cumberland_conditions
+cumberland_att$condition = cumberland_conditions
 
 # Binds the cumberland_att with new condition info to the PGA Biosis data
 data_attributes = append(priority_data_attributes, list(cumberland_att))
@@ -385,9 +381,9 @@ for (data_ind in seq_along(data_attributes)){
     PCT_set_to_use = which(data_attributes[[data_ind]]$PCT == build_params$PCT_to_use[PCT_ind])
 
     # Takes the data attributes table together with the polygon IDs and turns them into a matrix (to be written as a raster file later)
-    # Note, the feature_type = 'Condition_Class', specified that this function will be sampling from condition classes
+    # Note, the feature_type = 'condition_Class', specified that this function will be sampling from condition classes
 
-    current_feature = build_feature_layer(feature_type = 'Condition_Class', 
+    current_feature = build_feature_layer(feature_type = 'condition_Class', 
                                           PCT_set_to_use, 
                                           current_ID_array = feature_ID_layers[[data_ind]], 
                                           current_data_attributes = data_attributes[[data_ind]], 
