@@ -5,24 +5,24 @@ initialise_user_global_params <- function(folder_to_use){
   global_params = list()
   
   simulation_base_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  #global_params$simulation_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
+  #simulation_base_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
   global_params$simulation_folder = paste0(simulation_base_folder, folder_to_use, '/')
   
-  global_params$feature_raster_files = paste0(simulation_base_folder, 'simulation_inputs/', 
-                                              (list.files(path = paste0(simulation_base_folder, 'simulation_inputs/'),
+  global_params$feature_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
+                                              (list.files(path = paste0(simulation_base_folder, 'simulation_inputs_jan_17/'),
                                                           pattern = 'PCT_849_feature_', all.files = FALSE, 
                                                           full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                           include.dirs = FALSE, no.. = FALSE)))
   
-  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
+  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 'cadastre_withconstraints.tif')
   
-  global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs/', 
-                                                      (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
+  global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
+                                                      (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs_jan_17/'),
                                                                   pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
-  global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'simulation_inputs/')
+  global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'simulation_inputs_jan_17/')
   
   global_params$time_steps = 37
   global_params$features_to_use_in_simulation = 1:5

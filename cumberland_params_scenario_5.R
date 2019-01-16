@@ -251,10 +251,10 @@ initialise_user_feature_params <- function(current_author_splines){
   #the time over which the experts defined the curves
   
   feature_params$simulated_time_vec = 0:80
-  #   full_dynamics_set = lapply(seq_along(current_author_sheet_data),  
-  #                              function(i) lapply(seq_along(current_author_sheet_data[[i]]), 
-  #                                                 function(j) lapply(seq_along(current_author_sheet_data[[i]][[j]]), 
-  #                                                                    function(k) predict(current_author_sheet_data[[i]][[j]][[k]], 
+  #   full_dynamics_set = lapply(seq_along(current_author_splines),  
+  #                              function(i) lapply(seq_along(current_author_splines[[i]]), 
+  #                                                 function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
+  #                                                                    function(k) predict(current_author_splines[[i]][[j]][[k]], 
   #                                                                                        feature_params$simulated_time_vec)$y)))
   
   # full_dynamics_set is a list of vectors for each of the expert curves
@@ -265,10 +265,10 @@ initialise_user_feature_params <- function(current_author_splines){
   # i look: lifeform: grass, trees etc
   
   
-  full_dynamics_set = lapply(seq_along(current_author_sheet_data),  
-                             function(i) lapply(seq_along(current_author_sheet_data[[i]]), 
-                                                function(j) lapply(seq_along(current_author_sheet_data[[i]][[j]]), 
-                                                                   function(k) current_author_sheet_data[[i]][[j]][[k]](feature_params$simulated_time_vec))))
+  full_dynamics_set = lapply(seq_along(current_author_splines),  
+                             function(i) lapply(seq_along(current_author_splines[[i]]), 
+                                                function(j) lapply(seq_along(current_author_splines[[i]][[j]]), 
+                                                                   function(k) current_author_splines[[i]][[j]][[k]](feature_params$simulated_time_vec))))
   
   # This is just reordering the best upper and lower bound
   full_dynamics_set = lapply(seq_along(full_dynamics_set),  
