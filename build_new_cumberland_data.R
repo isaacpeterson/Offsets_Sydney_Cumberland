@@ -1,4 +1,3 @@
-rm(list = ls())
 library(rgdal)
 library(raster)
 library(rgeos)
@@ -17,6 +16,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
   if (length(PCT_set_to_use) == 0){
     current_feature = vector()
   } else {
+    browser()
     current_condition_class_set = data_attributes[[data_ind]]$Condition[PCT_set_to_use] 
     current_object_ID_set = data_attributes[[data_ind]]$OBJECTID[PCT_set_to_use]
     
@@ -31,6 +31,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
       if (feature_type == 'Condition_Class'){
         #make the condition class layer (each polygon of veg is composed of elements with the same value)
         current_element_vals = rep(current_condition_class_mode, length(current_element_set))
+        browser()
       } else if (feature_type == 'Feature_Value'){
         
         # Call OSIM function to sample feature values given condition class and condition class bounds
@@ -74,7 +75,7 @@ modify_mean <- function(current_condition_class_bounds, current_mean_modifier){
 }
 
 
-build_probability_list <- function(weight_layer, land_parcels, site_indexes_to_exclude){
+calc_intervention_probability <- function(weight_layer, land_parcels, site_indexes_to_exclude){
 
   intervention_weights = rep(list(0), length(land_parcels))
   sites_to_use = setdiff(seq_along(land_parcels), site_indexes_to_exclude)
@@ -95,159 +96,32 @@ project_data_to_zone_56 <- function(shp_to_project){
 }
   
 
-source('cumberland_params.R')
-#source('/Users/ascelin/analysis/GitHub/Offsets_Sydney_Cumberland/cumberland_params.R')
+sim_time <- Sys.time()
 
+source('cumberland_params.R')
 
 # Function defined in cumberland_params.R
 feature_params = initialise_user_feature_params()
 
-# Site characteristics is a nested list that holds the ids of each parcel.
-# It's the key that is used to break up the features in which bits overlap.
-# You can save time by not generating this agin by setting this flag to FALSE.
-# However if site_characteristics.rds isn't found, then it will be
-# autmotically generated.
-overwrite_site_characteristics = FALSE
+build_params = list()
+build_params$run_build_site_characteristics = FALSE
+build_params$build_probability_list = TRUE
+build_params$save_probability_list = FALSE
 
-
-# Isaac's locations 
-data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/final_rasters/')
-output_data_folder = '/Users/E24661/offset_data/Sydney_Cumberland_Data/new_prepared_data/'
-data_attribute_folder = data_folder
-simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_new/')
-
-# Ascelin's locations 
-# data_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/cumberland_aligned_tif/')
-# output_data_folder = '/Users/ascelin/analysis/offset_simulator/Sydney_Cumberland_Data/testing3/output_data_folder/'
-# data_attribute_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/veg_attributes/')
-# simulation_inputs_folder = paste0(path.expand('~'), '/analysis/offset_simulator/Sydney_Cumberland_Data/testing3/simulation_inputs_folder/')
-
-
-
-# Defines the study area and excludes parcels outside the study region. This
-# could be used to exclude additional areas from the analysis. Note for now all parcels are includeds.
-cad_msk_filename = paste0(data_folder, "cumberland_studyarea.tif")
-cad_msk_raster = offsetsim::load_rasters(cad_msk_filename, features_to_use = 'all')
-cadastre_msk = offsetsim::raster_to_array(cad_msk_raster)
-
-# Raster layer with the parcel ID in each pixel. 
-# Note that raster_to_array also removes all NAs and turns them into zeros.
-
-
-data_filenames = setdiff(list.files(path = data_folder, pattern = ".tif", all.files = FALSE, include.dirs = FALSE, no.. = FALSE), 
-                         list.files(path = data_folder, pattern = ".tif.", all.files = FALSE, include.dirs = FALSE, no.. = FALSE))
-
-cadastre_filename = "cadastre_segmented_final.tif"
-cadastre_ind = which(data_filenames == cadastre_filename)
-
-data_rasters = setNames(lapply(seq_along(data_filenames), 
-                               function(i) offsetsim::load_rasters(paste0(data_folder, data_filenames[i]), features_to_use = 'all')), data_filenames)
-
-data_rasters[[cadastre_ind]] = crop(data_rasters[[cadastre_ind]], 
-                                    data_rasters[[which(data_filenames == "cumberland_studyarea.tif")]])
-
-data_arrays = setNames(lapply(seq_along(data_filenames), function(i) offsetsim::raster_to_array(data_rasters[[i]])), data_filenames)
-
-
-# Build the site characteristics object. Contains the info the simulation to
-# assign pixel values to appropriate parcel and vegetation polygons. This
-# object is a list of vectors and arrays etc...
-if (file.exists(paste0(simulation_inputs_folder, 'site_characteristics.rds')) & (overwrite_site_characteristics == FALSE)){
-  site_characteristics = readRDS(paste0(simulation_inputs_folder, 'site_characteristics.rds'))
-} else {
-  cat('\nBuilding site_characteristics...')
-  site_characteristics = offsetsim::build_site_characteristics(data_arrays[[cadastre_ind]])
-  saveRDS(object = site_characteristics, file = paste0(simulation_inputs_folder, 'site_characteristics.rds'))
-  cat('\nWrote site_characteristics.rds')
-}
-
-# This is a list of length n, where n is the total number of parcels as define
-# in "cad_rst_exprt.tiff".  The IDs in this layer extrated via uique and sort,
-# and then renumbered starting from zero. Thus the ID of parcels to remove
-# need to mapped to correspond to this. 
-# Each element of the list is a single number.
-
-# Note: all Site IDs are integers. The code above, finds all unique integes
-# and gives then an ID starting from 1. However NAs have all gone to zero
-# above and hence, all zero parcels will have a site index of "1". We want to
-# remove them from the analysis as these aren't used. This is why
-# site_indexes_to_exclude is set to "1" below.
-
-objects_to_save = list()
-objects_to_save$dev_probability_list = build_probability_list(priority_growth_msk, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
-objects_to_save$offset_probability_list = build_probability_list(offset_msk_strategic, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
-objects_to_save$offset_probability_list_phase0 = build_probability_list(offset_msk_phase0, site_characteristics$land_parcels, site_indexes_to_exclude = 1)
-
-
-# Save the objects the output folder, save to file with the same name as the sublists (eg dev_probability_list)
-offsetsim::save_simulation_inputs(objects_to_save, output_data_folder)
-
-#### NOTES:
-
-### 1) cadastre_msk should be composed of 1 and NA instead of 0
-### 2) all extents should match i.e. cumberland_studyarea should match cadastre_segmented_final
-### 3) when setting extent(cumberland_studyarea) = extent(cadastre_segmented_final) is appears that the projections do not match - are they sampled at the same resolution?
-### 4) is there a separate "well characterised" layer or do we separate by PGA region mask?
-### 5) is Sydney Metro added?
-
-
-
-# These are the names of the excel files which contain the detailed veg
-# mapping by BIOSIS in the PGAs. These are the attributed tables of veg
-# mapping done by BIOSIS provided as shape files.
-
-priority_data_att_files = c('new_Vegetation_CumberlandPlain')
-priority_data_attributes = vector('list', length(priority_data_att_files)) #vector of type list
-
-# Read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
-for (data_ind in seq_along(priority_data_att_files)){
-  current_veg = priority_data_att_files[data_ind]
-  priority_data_attributes[[data_ind]] = read.xls(paste0(data_attribute_folder, priority_data_att_files[data_ind], '.xls'))
-}
-
-# These are the raster tif files that match each of the files defined in
-# priority_data_att_files. This is a rasterised version of the shape files and
-# priority_data_att_files is a excel file of the attribute table.
-priority_data_filenames = c("vegetation/new_Vegetation_CumberlandPlain.tif")
-
-feature_ID_rasters = offsetsim::load_rasters(paste0(data_folder, priority_data_filenames), features_to_use = 'all')
-
-# Convert the feature_ID_rasters stack to a list of arrays, turning NAs to zeros.
-# The values in the array represent the IDs for each polygon of Veg
-feature_ID_layers = lapply(seq(dim(feature_ID_rasters)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_rasters, i)))
-
-
-   #------------------------------
-   # Initialize the veg condition 
-   #------------------------------
-
-# This selects a subset priority_data_attributes that only contain the 'PCT', 'Condition', 'Shape_Area'.
-priority_condition_att = lapply(seq_along(priority_data_attributes), 
-        function(i) priority_data_attributes[[i]][match(c('PCT', 'Condition', 'Shape_Area'), names(priority_data_attributes[[i]]))])
-
-# Binds the corresponding list elements into arrys with the info.
-
-# makes one 3xn matrix of the data attributes. All priority areas are combined into one single matrix.
-priority_condition_set = do.call("rbind", priority_condition_att)
-
-# Attribute file that contains polygon information on cumberland region 
-cumberland_att = read.xls(paste0(data_attribute_folder, 'cum_veg_att.xls'))
+build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_jan_16/')
+build_params$output_data_folder = '/Users/E24661/offset_data/Sydney_Cumberland_Data/new_prepared_data/'
+build_params$data_attribute_folder = build_params$data_folder
+build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_new/')
 
 # This is how the parcel size sampling is done Specify area size classes for
-# sampling condition. If want to use different size classes, change this
-# vector.
+# sampling condition. If want to use different size classes, change this vector.
 # This is based on the freq distribution of the Shape_Area values for each PGA
-area_cuts_to_use = c(seq(0, 1e5, by = 1e4), Inf)
-
-labels_to_use = seq(length(area_cuts_to_use) - 1)
-
+build_params$area_cuts_to_use = c(0, 1e4, 2e4, 3e4, 6e4, 7e4, 8e4, 9e4, Inf)
 
 # only use PCT 849
-PCT_to_use = 849 #unique(priority_condition_set$PCT)
-#feature_num = 5 # number of features to use in condtion modelling (TG, GG) # to delete
+build_params$PCT_to_use = 849 #unique(priority_condition_set$PCT)
 
-
-condition_class_vals = matrix( ncol=2, byrow=TRUE, 
+build_params$condition_class_vals = matrix( ncol=2, byrow=TRUE, 
                                c('Intact', 4,
                                  'Thinned', 3,
                                  ' ', 0, 
@@ -262,39 +136,176 @@ condition_class_vals = matrix( ncol=2, byrow=TRUE,
                                  'Infrastructure', 0))
 
 
-# build list
-priority_cuts_by_PCT = vector('list', length(PCT_to_use))
+# Note that raster_to_array also removes all NAs and turns them into zeros.
 
+build_params$data_filenames = setdiff(list.files(path = build_params$data_folder, pattern = ".tif", all.files = FALSE, include.dirs = FALSE, no.. = FALSE), 
+                         list.files(path = build_params$data_folder, pattern = ".tif.", all.files = FALSE, include.dirs = FALSE, no.. = FALSE))
+
+# These are the raster tif files that match each of the files defined in
+# priority_data_att_files. This is a rasterised version of the shape files and
+# priority_data_att_files is a excel file of the attribute table.
+build_params$priority_data_filenames = paste0(build_params$data_folder, "All_Vegetation_CumberlandPlain.tif")
+
+# These are the names of the excel files which contain the detailed veg
+# mapping by BIOSIS in the PGAs. These are the attributed tables of veg
+# mapping done by BIOSIS provided as shape files.
+
+build_params$priority_data_att_filenames = c('All_Vegetation_CumberlandPlain')
+
+cadastre_ind = which(build_params$data_filenames == "cadastre.tif")
+
+GrowthAreas_ind = which(build_params$data_filenames == "GrowthAreas.tif")
+
+data_rasters = setNames(lapply(seq_along(build_params$data_filenames), 
+                               function(i) offsetsim::load_rasters(paste0(build_params$data_folder, build_params$data_filenames[i]), features_to_use = 'all')), build_params$data_filenames)
+
+data_arrays = setNames(lapply(seq_along(build_params$data_filenames), function(i) offsetsim::raster_to_array(data_rasters[[i]])), build_params$data_filenames)
+
+feature_ID_rasters = offsetsim::load_rasters(build_params$priority_data_filenames, features_to_use = 'all')
+
+# Convert the feature_ID_rasters stack to a list of arrays, turning NAs to zeros.
+# The values in the array represent the IDs for each polygon of Veg
+feature_ID_layers = lapply(seq(dim(feature_ID_rasters)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_rasters, i)))
+
+###  NOTE: reinstate when layers are updated definition below is just for testing routines
+cumberland_layer_IDs = unique(as.vector(feature_ID_layers[[1]]*(1 - data_arrays$GrowthAreas_DevFootprint.tif)))
+
+# Build the site characteristics object. Contains the info the simulation to
+# assign pixel values to appropriate parcel and vegetation polygons. This
+# object is a list of vectors and arrays etc...
+# Site characteristics is a nested list that holds the ids of each parcel.
+# It's the key that is used to break up the features in which bits overlap.
+# You can save time by not generating this agin by setting this flag to FALSE.
+# However if site_characteristics.rds isn't found, then it will be
+# autmotically generated.
+# This is a list of length n, where n is the total number of parcels as define
+# in "cad_rst_exprt.tiff".  The IDs in this layer extrated via uique and sort,
+# and then renumbered starting from zero. Thus the ID of parcels to remove
+# need to mapped to correspond to this. 
+
+if (build_params$run_build_site_characteristics == TRUE){
+  cat('\nbuilding site_characteristics...')
+  site_characteristics = offsetsim::build_site_characteristics(data_arrays[[cadastre_ind]])
+  
+  saveRDS(object = site_characteristics, file = paste0(build_params$simulation_inputs_folder, 'site_characteristics.rds'))
+  
+  paste0('site_characteristics object built at ',
+         round(difftime(Sys.time(), sim_time), 1), 
+         units(difftime(Sys.time(), sim_time)))
+  
+  cat('\nsaved site_characteristics object to ', paste0(build_params$simulation_inputs_folder, 'site_characteristics.rds'))
+  
+} else {
+  if (file.exists(paste0(build_params$simulation_inputs_folder, 'site_characteristics.rds'))){
+    paste0('loading site_characteristics object from file')
+    site_characteristics = readRDS(paste0(build_params$simulation_inputs_folder, 'site_characteristics.rds'))
+  }
+}
+
+# Note: all Site IDs are integers. The code above, finds all unique integes
+# and gives then an ID starting from 1. However NAs have all gone to zero
+# above and hence, all zero parcels will have a site index of "1". We want to
+# remove them from the analysis as these aren't used. This is why
+# site_indexes_to_exclude is set to "1" below.
+
+if (build_params$build_probability_list == TRUE){
+  
+  objects_to_save = list()
+  layer_names_to_use = matrix( ncol=2, byrow=TRUE, 
+                                c('GrowthAreas_DevFootprint.tif', 'dev_probability_list',
+                                  'SelectedAReas_Draft_v1.tif', 'offset_probability_list',
+                                  'Phase0Constraints.tif', 'offset_probability_list_phase0'))
+
+  probability_list = setNames(lapply(seq_along(layer_names_to_use), 
+                                     function(i) calc_intervention_probability(data_arrays[[which(names(data_arrays) == layer_names_to_use[i, 1])]],
+                                                                               site_characteristics$land_parcels, 
+                                                                               site_indexes_to_exclude = 1)), 
+                              layer_names_to_use[, 2])
+  
+  # Save the objects the output folder, save to file with the same name as the sublists (eg dev_probability_list)
+  if (build_params$save_probability_list == TRUE){
+    offsetsim::save_simulation_inputs(objects_to_save, build_params$simulation_inputs_folder)
+  }
+}
+
+
+
+priority_data_attributes = vector('list', length(build_params$priority_data_att_filenames)) #vector of type list
+
+# Read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
+for (data_ind in seq_along(build_params$priority_data_att_filenames)){
+  current_veg = build_params$priority_data_att_filenames[data_ind]
+  priority_data_attributes[[data_ind]] = read.xls(paste0(build_params$data_attribute_folder, build_params$priority_data_att_filenames[data_ind], '.xls'))
+}
+
+
+# build artificial attribute table for region outside priority region - set all polygons outside priority region to cumberland_layer 
+cumberland_ID_inds = which(priority_data_attributes[[1]]$object_ID %in% cumberland_layer_IDs)
+priority_IDs = setdiff(1:dim(priority_data_attributes[[1]])[1], cumberland_ID_inds)
+
+######### ARTIFICIALLY ADD SHAPE AREAS, REMOVE WHEN AREAS ARE PROVIDED
+priority_data_attributes[[1]]$Shape_Area = c(runif(n = 1000, min = 0, max = 3e4), 
+                                             runif(n = dim(priority_data_attributes[[1]])[1] - 1000, min = 5e4, max = 1e5))
+
+
+cumberland_att = priority_data_attributes[[1]][cumberland_ID_inds, ]
+priority_data_attributes[[1]] = priority_data_attributes[[1]][priority_IDs, ]
+
+   #------------------------------
+   # Initialize the veg condition 
+   #------------------------------
+
+# This selects a subset priority_data_attributes that only contain the 'PCT', 'Condition', 'Shape_Area'.
+
+priority_condition_att = lapply(seq_along(priority_data_attributes), 
+                                function(i) priority_data_attributes[[i]][match(c('PCT', 'Condition', 'Shape_Area'), names(priority_data_attributes[[i]]))])
+
+# makes one matrix of the data attributes. All priority areas are combined into one single matrix.
+priority_condition_set = do.call("rbind", priority_condition_att)
+
+labels_to_use = seq(length(build_params$area_cuts_to_use) - 1)
+priority_cuts_by_PCT = vector('list', length(build_params$PCT_to_use))
 
 # Setting up wher the cuts are. For each PCT polygon, check which cut category the polygon should go into.
-for (PCT_ind in seq_along(PCT_to_use)){
-  current_PCT_set = (priority_condition_set$PCT == PCT_to_use[PCT_ind])
+for (PCT_ind in seq_along(build_params$PCT_to_use)){
+  current_PCT_set = (priority_condition_set$PCT == build_params$PCT_to_use[PCT_ind])
   
-  current_cuts = cut(priority_condition_set$Shape_Area[current_PCT_set], area_cuts_to_use, labels = labels_to_use)
+  current_cuts = cut(priority_condition_set$Shape_Area[current_PCT_set], build_params$area_cuts_to_use, labels = labels_to_use)
   
   current_condition_set = priority_condition_set$Condition[current_PCT_set]
   current_cut_set = vector('list', length(labels_to_use))
-  for (cut_ind in seq(length(labels_to_use))){
-    current_cut_set[[cut_ind]] = current_condition_set[current_cuts == cut_ind]
+  
+  for (cut_ind in seq_along(labels_to_use)){
+    current_cut_set[[cut_ind]] = as.character(current_condition_set[current_cuts == cut_ind])
   }
+  
   priority_cuts_by_PCT[[PCT_ind]] = current_cut_set
+  
 }
 
 
 # Splits the data up via the specified cuts
-full_cuts = cut(priority_condition_set$Shape_Area, area_cuts_to_use, labels = labels_to_use)
+full_cuts = cut(priority_condition_set$Shape_Area, build_params$area_cuts_to_use, labels = labels_to_use)
 
 full_priority_cut_stats = vector('list', length(labels_to_use))
 
 # bulding the distribution to sample from. Note the 'table' command give the fequency of each element 
-for (cut_ind in seq(length(labels_to_use))){
+cuts_to_remove = vector()
+
+for (cut_ind in seq_along(labels_to_use)){
   full_priority_cut_stats[[cut_ind]] = as.data.frame(table(priority_condition_set$Condition[full_cuts == cut_ind]))
+  if (sum(full_priority_cut_stats[[cut_ind]]$Freq) == 0){
+    cuts_to_remove <- append(cuts_to_remove, cut_ind)
+  }
 }
 
-cumberland_cuts = cut(cumberland_att$Shape_Area, area_cuts_to_use, labels = labels_to_use)
-cumberland_conditions = vector(mode="character", length(cumberland_att$Shape_Area))
+if (length(cuts_to_remove) > 0){
+  print(paste0('area_cuts_to_use is poorly parametrised, remove', paste(cuts_to_remove)))
+  stop()
+}
 
-
+cumberland_cuts = as.numeric(cut(cumberland_att$Shape_Area, build_params$area_cuts_to_use, labels = labels_to_use))
+cumberland_conditions = vector(mode ="character", length(cumberland_att$Shape_Area))
 
 # For the current polygon of the given PCT of a given area, check if there are
 # more than min_data_count entries to create the distriubtion to sample from
@@ -302,52 +313,47 @@ cumberland_conditions = vector(mode="character", length(cumberland_att$Shape_Are
 # still not enough add in all PCT of that particular cut.
 min_data_count = 50
 
-
 # This loop here now does the sampling for each polygon of each PCT. For now
 # we just using PCT 849. this builds a data attribute table for the polygons
 # that don't have attributes for condition, based on the Biosis condition
 # classes in the PGAs
 
-for (site_ind in seq(length(cumberland_att$Shape_Area))){
-  
+
+for (site_ind in seq_along(cumberland_att$Shape_Area)){
   # see if this is a polygon of veg is one the relevant PCTs
-  if (cumberland_att$PCT[site_ind] %in% PCT_to_use){
-
+  if (cumberland_att$PCT[site_ind] %in% build_params$PCT_to_use){
     # data frame with with polygons from the PGAs, of the current cut category within the PCT
-    current_priority_stats = as.data.frame(table(priority_cuts_by_PCT[[match(cumberland_att$PCT[site_ind], PCT_to_use)]][[cumberland_cuts[site_ind]]]))
-
+    current_priority_stats = as.data.frame(table(priority_cuts_by_PCT[[match(cumberland_att$PCT[site_ind], build_params$PCT_to_use)]][[cumberland_cuts[site_ind]]]))
     # check if there are enough polygons to sample from
     if (sum(current_priority_stats$Freq) < min_data_count){
-
       # An this case there is not enough, so expland out to use all cut categoires for that PCT
-      current_priority_stats = as.data.frame(table(unlist(priority_cuts_by_PCT[[match(cumberland_att$PCT[site_ind], PCT_to_use)]])))
+      current_priority_stats = as.data.frame(table(unlist(priority_cuts_by_PCT[[match(cumberland_att$PCT[site_ind], build_params$PCT_to_use)]])))
     }
-
     # if still not enough data to sampel from 
     if (sum(current_priority_stats$Freq) < min_data_count){
-
       # sample from all PCTs within the cut category
       current_priority_stats = full_priority_cut_stats[[cumberland_cuts[site_ind]]]
-
     }
-
   } else {
-
-    # Here we are one of the PCTs not in PCT_to_use, in this case sample from all the data.
+    # Here we are one of the PCTs not in PCT_to_use, in this case sample from all the data.89
     current_priority_stats = full_priority_cut_stats[[cumberland_cuts[site_ind]]]
+    # This is the sampling to determine the condition class
+    if (sum(current_priority_stats$Freq) > 0){
+      current_sampled_condition_index = sample(x = seq_along(current_priority_stats$Freq), size = 1, 
+                                               prob = current_priority_stats$Freq/sum(current_priority_stats$Freq), replace = TRUE)
+    } else {
+      print('cut flag')
+    }
+    # This builds a data attributes list that matches the condition_class_vlas
+    # Storing the condition class based on what is in condition_class_vals above (eg in tact, scattered trees et)
   }
   
-
-  # This is the sampling to determine the condition class
-  current_cond_inds = sample(x = seq_along(current_priority_stats$Freq), size = 1, prob = current_priority_stats$Freq/sum(current_priority_stats$Freq), replace = TRUE)
-
-  # This builds a data attributes list that matches the condition_class_vlas
-  # Storing the condition class based on what is in condition_class_vals above (eg in tact, scattered trees et)
-
   # building a vector of names, based on the sampled conditon value of each polygon
   # Note "Var1" is from R's table() function call above.
-  cumberland_conditions[site_ind] = as.character(current_priority_stats$Var1[as.numeric(current_cond_inds)])
+  cumberland_conditions[site_ind] = as.character(current_priority_stats$Var1[current_sampled_condition_index])
 }
+
+
 
 
 # assign all the new sampled condition classes to attribute table of the cumberland plain veg shape file (that did not originally have veg data)
@@ -356,23 +362,27 @@ cumberland_att$Condition = cumberland_conditions
 # Binds the cumberland_att with new condition info to the PGA Biosis data
 data_attributes = append(priority_data_attributes, list(cumberland_att))
 
+####### REMOVE IF NECESSARY - USED TO simulate two ldisjoint layers
+feature_ID_layers = append(feature_ID_layers, feature_ID_layers)
 # sets the list names to match the veg layers
-names(data_attributes) = c(priority_data_att_files, 'cum_veg_att')
+names(data_attributes) = c(build_params$priority_data_att_filenames, 'cumberland_att')
 
-# Builds a nested list defined by the 4 data layers and of length PCT_to_use  
-# to save info for each PCT separately.
-condition_class_set = lapply(seq_along(data_attributes), function(i) vector('list', length(PCT_to_use)))
 
 
 # ----------------------
 # Building the condition class array which gives the condition class of each pixel to then write them to raster layers 
 # ----------------------
 
+
+# Builds a nested list defined by the 4 data layers and of length PCT_to_use  
+# to save info for each PCT separately.
+condition_class_set = lapply(seq_along(data_attributes), function(i) vector('list', length(build_params$PCT_to_use)))
+
 for (data_ind in seq_along(data_attributes)){
   
-  for (PCT_ind in seq_along(PCT_to_use)){
+  for (PCT_ind in seq_along(build_params$PCT_to_use)){
     
-    PCT_set_to_use = which(data_attributes[[data_ind]]$PCT == PCT_to_use[PCT_ind])
+    PCT_set_to_use = which(data_attributes[[data_ind]]$PCT == build_params$PCT_to_use[PCT_ind])
 
     # Takes the data attributes table together with the polygon IDs and turns them into a matrix (to be written as a raster file later)
     # Note, the feature_type = 'Condition_Class', specified that this function will be sampling from condition classes
@@ -381,7 +391,7 @@ for (data_ind in seq_along(data_attributes)){
                                           PCT_set_to_use, 
                                           current_ID_array = feature_ID_layers[[data_ind]], 
                                           current_data_attributes = data_attributes[[data_ind]], 
-                                          condition_class_vals, 
+                                          build_params$condition_class_vals, 
                                           feature_params, 
                                           condition_class_bounds = vector(), 
                                           modify_means = FALSE, 
@@ -390,12 +400,12 @@ for (data_ind in seq_along(data_attributes)){
     # This dealing with the overlaps between the Biosis PGA veg mapping and the Cumberland west veg mapping
     # for the overlap area use the biosis values
 
-    if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
+    if (names(data_attributes)[data_ind] ==  'cumberland_att'){
       # outside PGAs so use sampled data
-      current_feature = current_feature*(1 - priority_growth_msk)
+      current_feature = current_feature*(1 - data_arrays[[GrowthAreas_ind]])
     } else {
       # Use Biosis data
-      current_feature = current_feature*priority_growth_msk
+      current_feature = current_feature*data_arrays[[GrowthAreas_ind]]
     }
     condition_class_set[[data_ind]][[PCT_ind]] = current_feature
 
@@ -406,9 +416,9 @@ for (data_ind in seq_along(data_attributes)){
 
 # for each PCT, add the PGA condition array to the sampled condition array.
 
-merged_condition_classes = vector('list', length(PCT_to_use))
-for (PCT_ind in seq_along(PCT_to_use)){
+merged_condition_classes = vector('list', length(build_params$PCT_to_use))
 
+for (PCT_ind in seq_along(build_params$PCT_to_use)){
   inds_to_use = which(unlist(lapply(seq_along(condition_class_set), function(i) length(condition_class_set[[i]][[PCT_ind]]) > 0)))
   merged_condition_classes[[PCT_ind]] = Reduce('+', lapply(inds_to_use, function(i) condition_class_set[[i]][[PCT_ind]]))
 }
@@ -417,10 +427,10 @@ for (PCT_ind in seq_along(PCT_to_use)){
 # write out the condition class rasters that are used by the simulation to split features per condition class per site
 # if these are not supplied the simulation will assign the condition classes internally - which is a problem for this project
 
-for (PCT_ind in seq_along(PCT_to_use)){
+for (PCT_ind in seq_along(build_params$PCT_to_use)){
   current_feature_raster = raster(merged_condition_classes[[PCT_ind]])
   for (feature_ind in seq(feature_params$simulated_feature_num)){
-    current_file_name = paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_condition_class_', 
+    current_file_name = paste0(build_params$output_data_folder, 'PCT_', build_params$PCT_to_use[PCT_ind], '_condition_class_', 
                                formatC(feature_ind, width = 3, format = "d", flag = "0"), '.tif')
     writeRaster(current_feature_raster, current_file_name, overwrite = TRUE)
   }
@@ -437,23 +447,23 @@ for (PCT_ind in seq_along(PCT_to_use)){
 # Same issue as above about combining the PGA data with the data fro the rest of the Cumberland mapping.
 
 # This is the vector you need to supply to yield higher feature values, and subsequently their matching feature dynamics. It needs to be of equal length
-# to the number of feature polygons in the current PCT, in this case defined by length(which(data_attributes[[data_ind]]$PCT == PCT_to_use)). All
+# to the number of feature polygons in the current PCT, in this case defined by length(which(data_attributes[[data_ind]]$PCT == build_params$PCT_to_use)). All
 # values within vector range between [-1, 1] and are used to modify the distribution used to sample the feature values from.
 # Values in range [0, 1] increase the mean, values in range [-1, 0] decrease the mean. Therefore if you identify large (conservation) regions with values 
 # between [0, 1], and regions with poor connectivity between [-1, 0] you will get the effect that grouping offsets together will yield betetr results that 
 #splitting them apart. Note that this would ideally be calculated dynamically in situ as the simulation is running to account for the changes in the distribution
 # of sites as the simulation proceeds
 
-means_modifier = runif(min = -1, max = 1, length(which(data_attributes[[data_ind]]$PCT == PCT_to_use)))
+means_modifier = runif(min = -1, max = 1, length(which(data_attributes[[data_ind]]$PCT == build_params$PCT_to_use)))
 
 condition_vals_set = lapply(seq_along(data_attributes), 
-                            function(i) lapply(seq_along(PCT_to_use), 
+                            function(i) lapply(seq_along(build_params$PCT_to_use), 
                                                function(j) vector('list', feature_params$simulated_feature_num)))
 
 for (data_ind in seq_along(data_attributes)){
   
-  for (PCT_ind in seq_along(PCT_to_use)){
-    PCT_set_to_use = which(data_attributes[[data_ind]]$PCT == PCT_to_use[PCT_ind])
+  for (PCT_ind in seq_along(build_params$PCT_to_use)){
+    PCT_set_to_use = which(data_attributes[[data_ind]]$PCT == build_params$PCT_to_use[PCT_ind])
     
     for (feature_ind in seq(feature_params$simulated_feature_num)){
       
@@ -462,14 +472,14 @@ for (data_ind in seq_along(data_attributes)){
                                             PCT_set_to_use, 
                                             current_ID_array = feature_ID_layers[[data_ind]], 
                                             current_data_attributes = data_attributes[[data_ind]], 
-                                            condition_class_vals, 
+                                            build_params$condition_class_vals, 
                                             feature_params, 
                                             # Note these are where the condition class bounds come from 
                                             condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]], 
                                             modify_means = TRUE, 
                                             means_modifier)
       
-      if (names(data_attributes)[data_ind] ==  'cum_veg_att'){
+      if (names(data_attributes)[data_ind] ==  'cumberland_att'){
         current_feature = current_feature*(priority_growth_msk == 0)
       } else {
         current_feature = current_feature*priority_growth_msk
@@ -485,9 +495,9 @@ for (data_ind in seq_along(data_attributes)){
 
 # combining the values
 
-merged_condition_vals = lapply(seq_along(PCT_to_use), function(i) vector('list', feature_params$simulated_feature_num ))
+merged_condition_vals = lapply(seq_along(build_params$PCT_to_use), function(i) vector('list', feature_params$simulated_feature_num ))
                                
-for (PCT_ind in seq_along(PCT_to_use)){
+for (PCT_ind in seq_along(build_params$PCT_to_use)){
   for (feature_ind in seq(feature_params$simulated_feature_num)){
     inds_to_use = which(unlist(lapply(seq_along(condition_class_set), function(i) length(condition_vals_set[[i]][[PCT_ind]][[feature_ind]]) > 0)))
     merged_condition_vals[[PCT_ind]][[feature_ind]] = Reduce('+', lapply(inds_to_use, function(i) condition_vals_set[[i]][[PCT_ind]][[feature_ind]]))
@@ -497,10 +507,10 @@ for (PCT_ind in seq_along(PCT_to_use)){
 
 # writing them as rasters.
 
-for (PCT_ind in seq_along(PCT_to_use)){
+for (PCT_ind in seq_along(build_params$PCT_to_use)){
   for (feature_ind in seq(feature_params$simulated_feature_num)){
     current_feature_raster = raster(merged_condition_vals[[PCT_ind]][[feature_ind]])
-    current_file_name = paste0(output_data_folder, 'PCT_', PCT_to_use[PCT_ind], '_feature_', 
+    current_file_name = paste0(build_params$output_data_folder, 'PCT_', build_params$PCT_to_use[PCT_ind], '_feature_', 
                                formatC(feature_ind, width = 3, format = "d", flag = "0"), '.tif')
     writeRaster(current_feature_raster, current_file_name, overwrite = TRUE)
     print(current_file_name) 
