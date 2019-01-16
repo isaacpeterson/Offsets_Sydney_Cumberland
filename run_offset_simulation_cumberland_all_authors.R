@@ -7,10 +7,15 @@ user_simulation_params = initialise_user_simulation_params()
 user_global_params = initialise_user_global_params()
 user_output_params <- initialise_user_output_params()
 
-author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
+# author_names = c('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds', 
+#                  'REVISED_Elicitation_CP_Workshop_dkeith_splines.rds', 
+#                  'REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds', 
+#                  'REVISED_Elicitation_CP_Workshop_pprice_splines.rds', 
+#                  'REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
+
+author_names = 'mean_splines.rds'
 author_sheet_data = lapply(seq_along(author_names), 
-                                   function(i) readRDS(paste0('REVISED_Elicitation_CP_Workshop_', 
-                                                              author_names[i], '_splines.rds'))) 
+                                   function(i) readRDS(author_names[i])) 
 
 for (i in seq_along(author_names)){
   

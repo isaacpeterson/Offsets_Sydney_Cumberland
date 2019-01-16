@@ -35,7 +35,7 @@ initialise_user_global_params <- function(){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 2
+  global_params$realisation_num = 1
   
   global_params$save_simulation_outputs = TRUE
   
