@@ -1,9 +1,8 @@
 library(offsetsim)
 
-scenario_num = 1
+scenario_num = 5
 
 source(paste0('cumberland_params_scenario_', scenario_num, '.R'))
-
 
 user_output_params <- initialise_user_output_params()
 

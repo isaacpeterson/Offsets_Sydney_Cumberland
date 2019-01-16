@@ -109,7 +109,7 @@ build_params$save_probability_list = FALSE
 build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_jan_16/')
 build_params$output_data_folder = '/Users/E24661/offset_data/Sydney_Cumberland_Data/new_prepared_data/'
 build_params$data_attribute_folder = build_params$data_folder
-build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_new/')
+build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/')
 
 # This is how the parcel size sampling is done Specify area size classes for
 # sampling condition. If want to use different size classes, change this vector.
@@ -143,7 +143,6 @@ build_params$condition_class_vals = matrix( ncol=2, byrow=TRUE,
                                               'Dam', 0, 
                                               'Scattered trees', 2, 
                                               'Infrastructure', 0))
-
 
 # Note that raster_to_array also removes all NAs and turns them into zeros.
 
