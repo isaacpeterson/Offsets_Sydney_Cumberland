@@ -17,7 +17,7 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 'cadastre_withconstraints.tif')
   
   global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
-                                                      (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs_jan_17/'),
+                                                      (list.files(path = paste0(simulation_base_folder, 'simulation_inputs_jan_17/'),
                                                                   pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
@@ -70,11 +70,7 @@ initialise_user_global_params <- function(folder_to_use){
   # just take a bit longer to get started.
   
   global_params$overwrite_management_dynamics = TRUE
-  
-  # on first run set to true - for all other scenarios leave set to false
   global_params$overwrite_feature_dynamics = FALSE
-  
-  # on first run set to true - for all other scenarios leave set to false
   global_params$build_background_cfacs = FALSE
   
   return(global_params)
