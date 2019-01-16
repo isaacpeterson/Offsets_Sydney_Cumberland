@@ -1,27 +1,27 @@
 # developments and offsets secured at yr 1 with low intensity
-initialise_user_global_params <- function(){
+initialise_user_global_params <- function(folder_to_use){
   
   global_params = list()
   
-  global_params$simulation_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  #global_params$simulation_folder = '/Users/ascelin/analysis/offset_simulator/osim_runs/cumberland/'
+  simulation_base_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  #simulation_base_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
+  global_params$simulation_folder = paste0(simulation_base_folder, folder_to_use, '/')
   
-  global_params$feature_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
-                                              (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
+  global_params$feature_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
+                                              (list.files(path = paste0(simulation_base_folder, 'simulation_inputs_jan_17/'),
                                                           pattern = 'PCT_849_feature_', all.files = FALSE, 
                                                           full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                           include.dirs = FALSE, no.. = FALSE)))
   
-  global_params$planning_units_raster = paste0(global_params$simulation_folder, 'simulation_inputs/', 'cad_rst_exprt.tif')
+  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 'cadastre_withconstraints.tif')
   
-  global_params$condition_class_raster_files = paste0(global_params$simulation_folder, 'simulation_inputs/', 
-                                                      (list.files(path = paste0(global_params$simulation_folder, 'simulation_inputs/'),
+  global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
+                                                      (list.files(path = paste0(simulation_base_folder, 'simulation_inputs_jan_17/'),
                                                                   pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                                   include.dirs = FALSE, no.. = FALSE)))
   
-  # What subset of features to use in the simulation
-  # Need to keep these as is to use veg integrity score
+  global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'simulation_inputs_jan_17/')
   
   global_params$features_to_use_in_simulation = 1:5
   
@@ -33,7 +33,9 @@ initialise_user_global_params <- function(){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 2
+  global_params$realisation_num = 1
+  
+  global_params$time_steps = 37
   
   global_params$save_simulation_outputs = TRUE
   
@@ -71,12 +73,9 @@ initialise_user_global_params <- function(){
 
 
 
-initialise_user_simulation_params <- function(){ 
+initialise_user_simulation_params <- function(simulated_time_steps){ 
   
   simulation_params = list()
-  
-  # How long to run the simulaton in years
-  simulation_params$time_steps = 37 # 50
   
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
@@ -166,8 +165,9 @@ initialise_user_simulation_params <- function(){
   
   # 'pre-determined' - list site id's specifically 
   simulation_params$banked_offset_selection_type = 'pre_determined'  
-  banked_offset_control = vector('list', simulation_params$time_steps)
-  banked_offset_control[1:simulation_params$time_steps] = array(0, simulation_params$time_steps)
+  banked_offset_control = vector('list', simulated_time_steps)
+  
+  banked_offset_control[1:simulated_time_steps] = array(0, simulated_time_steps)
   
   #these are the actual site ids specified in the raster layer
   #offset_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_new/offset_probability_list_phase0.rds')
@@ -188,9 +188,9 @@ initialise_user_simulation_params <- function(){
   # intialise_routines.R  (or put the files in simulation_inputs)
   simulation_params$development_selection_type = 'stochastic'  
   
-  simulation_params$development_control = list(build_stochastic_intervention(simulation_params$time_steps, 
+  simulation_params$development_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                              intervention_start = 1, 
-                                                                             intervention_end = 37, 
+                                                                             intervention_end = simulated_time_steps, 
                                                                              intervention_num = 3789, 
                                                                              sd = 1))
   
@@ -227,14 +227,7 @@ user_transform_function <- function(pool_vals, transform_params){
 
 
 
-initialise_user_feature_params <- function(){
-  
-  current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkirk_splines.rds') # works
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_dkeith_splines.rds') # works
-  
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_gsteenbeeke_splines.rds')
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_pprice_splines.rds')
-  #current_author_splines = readRDS('REVISED_Elicitation_CP_Workshop_cmorris_splines.rds')
+initialise_user_feature_params <- function(current_author_splines){
   
   feature_params = list()
   feature_params$scale_features = FALSE
