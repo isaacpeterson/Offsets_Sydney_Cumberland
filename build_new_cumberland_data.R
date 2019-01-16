@@ -35,7 +35,6 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
         
         # Call OSIM function to sample feature values given condition class and condition class bounds
         
-        
         # Modify this condition_class_bounds is a nested list with info on the min, max and mean for each of the given conditions. 
         # Want to alter the mean values in condition_class_bounds to be able make 
         
@@ -492,16 +491,28 @@ for (data_ind in seq_along(data_attributes)){
                                             means_modifier)
       
       if (names(data_attributes)[data_ind] ==  'cumberland_att'){
-        current_feature = current_feature*(priority_growth_msk == 0)
+        current_feature = current_feature*(1 - data_arrays[[GrowthAreas_ind]])
       } else {
-        current_feature = current_feature*priority_growth_msk
+        current_feature = current_feature*data_arrays[[GrowthAreas_ind]]
       }
       
       condition_vals_set[[data_ind]][[PCT_ind]][[feature_ind]] = current_feature
     }
-    
+    paste0('feature ', feature_ind, 'values built at ',
+           round(difftime(Sys.time(), sim_time), 1), 
+           units(difftime(Sys.time(), sim_time)))
   }
 }
+
+
+current_ID_array = feature_ID_layers[[data_ind]]
+current_data_attributes = data_attributes[[data_ind]] 
+current_condition_class_set = current_data_attributes$condition[PCT_set_to_use] 
+current_object_ID_set = current_data_attributes$object_ID[PCT_set_to_use]
+current_feature = matrix(0, dim(current_ID_array)[1], dim(current_ID_array)[2])
+
+
+
 
 paste0('condition values built at ',
        round(difftime(Sys.time(), sim_time), 1), 

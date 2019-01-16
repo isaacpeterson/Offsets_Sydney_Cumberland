@@ -1,3 +1,5 @@
+# no developments no offsets
+
 initialise_user_global_params <- function(){
   
   global_params = list()
@@ -52,7 +54,9 @@ initialise_user_global_params <- function(){
   global_params$overwrite_offset_probability_list = FALSE
   global_params$overwrite_unregulated_probability_list = FALSE
   
+  # always leave false for this project
   global_params$overwrite_site_features = FALSE
+  global_params$overwrite_condition_classes = FALSE
   
   # If building all inputs from scratch via the initialise_cumberland_data.R,
   # then these need to be set to TRUE for the first run, to generate the
@@ -61,8 +65,11 @@ initialise_user_global_params <- function(){
   # just take a bit longer to get started.
   
   global_params$overwrite_management_dynamics = TRUE
+  
+  # on first run set to true - for all other scenarios leave set to false
   global_params$overwrite_feature_dynamics = FALSE
-  global_params$overwrite_condition_classes = FALSE
+  
+  # on first run set to true - for all other scenarios leave set to false
   global_params$build_background_cfacs = FALSE
   
   return(global_params)

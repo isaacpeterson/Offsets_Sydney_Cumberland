@@ -1,3 +1,5 @@
+#development only
+
 initialise_user_global_params <- function(){
   
   global_params = list()
@@ -177,6 +179,7 @@ initialise_user_simulation_params <- function(){
   # intialise_routines.R  (or put the files in simulation_inputs)
   simulation_params$development_selection_type = 'stochastic'  
 
+  ### 3789 sites in old specified region 
   simulation_params$development_control = list(build_stochastic_intervention(simulation_params$time_steps, 
                                                                              intervention_start = 1, 
                                                                              intervention_end = 37, 

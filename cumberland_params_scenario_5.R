@@ -1,3 +1,5 @@
+# offsets occur at simulation initialisation, high intensity management
+
 initialise_user_global_params <- function(){
   
   global_params = list()
@@ -290,6 +292,8 @@ initialise_user_feature_params <- function(current_author_sheet_data){
   unmanaged_datasheets = list(4, 8, 12, 16, 20)
   
   background_dynamics_set = collate_dynamics(full_dynamics_set, background_datasheets, set_index_to_use = 1)
+  
+  # LOW INTENSITY: set_index_to_use = 2 , HIGH INTENSITY set_index_to_use = 3
   management_dynamics_set = collate_dynamics(full_dynamics_set, management_datasheets, set_index_to_use = 3)
   
   unmanaged_set = collate_dynamics(full_dynamics_set, unmanaged_datasheets, set_index_to_use = 1)
