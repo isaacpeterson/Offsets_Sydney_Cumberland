@@ -29,7 +29,7 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$features_to_use_in_simulation = 1:5
   
   # How long to run the simulaton in years
-  global_params$time_steps = 15 # 50
+  global_params$time_steps = 5 # 50
   
   global_params$store_zeros_as_sparse = TRUE
   

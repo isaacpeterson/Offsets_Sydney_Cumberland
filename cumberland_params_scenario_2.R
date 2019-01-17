@@ -27,7 +27,7 @@ initialise_user_global_params <- function(folder_to_use){
   # Need to keep these as is to use veg integrity score
   
   # How long to run the simulaton in years
-  global_params$time_steps = 37 # 50
+  global_params$time_steps = 5 # 50
   
   global_params$features_to_use_in_simulation = 1:5
   
@@ -39,7 +39,7 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 2
+  global_params$realisation_num = 1
   
   global_params$save_simulation_outputs = TRUE
   

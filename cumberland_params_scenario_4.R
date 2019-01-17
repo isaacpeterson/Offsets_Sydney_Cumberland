@@ -24,7 +24,7 @@ initialise_user_global_params <- function(folder_to_use){
   
   global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'simulation_inputs_jan_17/')
   
-  global_params$time_steps = 37
+  global_params$time_steps = 5
   global_params$features_to_use_in_simulation = 1:5
   
   global_params$store_zeros_as_sparse = TRUE

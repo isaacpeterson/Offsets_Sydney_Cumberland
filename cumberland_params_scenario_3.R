@@ -35,7 +35,7 @@ initialise_user_global_params <- function(folder_to_use){
   # The number of realizations to run
   global_params$realisation_num = 1
   
-  global_params$time_steps = 37
+  global_params$time_steps = 5
   
   global_params$save_simulation_outputs = TRUE
   

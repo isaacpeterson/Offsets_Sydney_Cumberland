@@ -1,16 +1,17 @@
 library(offsetsim)
 
-scenario_num = 5
+scenario_num = 3
 
 source(paste0('cumberland_params_scenario_', scenario_num, '.R'))
 
 user_output_params <- initialise_user_output_params()
 
-author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
-
-# author_names = 'mean_splines.rds'
+# author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
+# author_sheet_data = lapply(seq_along(author_names), 
+#                                    function(i) readRDS(paste0('REVISED_Elicitation_CP_Workshop_', author_names[i], '_splines.rds'))) 
+author_names = 'mean_splines'
 author_sheet_data = lapply(seq_along(author_names), 
-                                   function(i) readRDS(paste0('REVISED_Elicitation_CP_Workshop_', author_names[i], '_splines.rds'))) 
+                                   function(i) readRDS(paste0(author_names[i], '.rds'))) 
 
 for (i in seq_along(author_names)){
   
