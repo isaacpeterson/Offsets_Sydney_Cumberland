@@ -170,10 +170,9 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   banked_offset_control[1:simulated_time_steps] = array(0, simulated_time_steps)
   
   #these are the actual site ids specified in the raster layer
-  #offset_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_new/offset_probability_list_phase0.rds')
-  #banked_offset_sites_to_use = site_characteristics$site_IDs[which(unlist(offset_probability_list) > 0)]
-  
-  banked_offset_sites_to_use = 4e5:8e5 
+  offset_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/offset_probability_list.rds')
+  site_characteristics = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/site_characteristics.rds')
+  banked_offset_sites_to_use = site_characteristics$site_IDs[which(unlist(offset_probability_list) > 0)]
   
   # [[1]] indicates all offsets to take place on year 1
   banked_offset_control[[1]] = banked_offset_sites_to_use
@@ -188,10 +187,14 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   # intialise_routines.R  (or put the files in simulation_inputs)
   simulation_params$development_selection_type = 'stochastic'  
   
+  #development_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/dev_probability_list.rds')
+  #dev_num = length(which(unlist(development_probability_list) > 0))
+  # jan 17 cadastre data yields 4578 sites in development region
+  
   simulation_params$development_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                              intervention_start = 1, 
                                                                              intervention_end = simulated_time_steps, 
-                                                                             intervention_num = 3789, 
+                                                                             intervention_num = 4578, 
                                                                              sd = 1))
   
   #ignore offset sites with zero value

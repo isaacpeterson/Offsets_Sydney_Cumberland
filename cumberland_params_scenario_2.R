@@ -183,11 +183,14 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   # intialise_routines.R  (or put the files in simulation_inputs)
   simulation_params$development_selection_type = 'stochastic'  
 
-  ### 3789 sites in old specified region 
+  #development_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/dev_probability_list.rds')
+  #dev_num = length(which(unlist(development_probability_list) > 0))
+  # jan 17 cadastre data yields 4578 sites in development region
+  
   simulation_params$development_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                              intervention_start = 1, 
                                                                              intervention_end = simulated_time_steps, 
-                                                                             intervention_num = 3789, 
+                                                                             intervention_num = 4578, 
                                                                              sd = 1))
   
   #ignore offset sites with zero value
