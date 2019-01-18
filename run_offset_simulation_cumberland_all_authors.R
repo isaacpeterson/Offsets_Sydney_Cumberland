@@ -27,4 +27,4 @@ for (i in seq_along(author_names)){
   
 }
 
-cat('\n simulation and outputs using', source_filename, 'completed \n')
+cat('\n simulation and outputs using', paste0('cumberland_params_scenario_', scenario_num, '.R'), 'completed \n')
