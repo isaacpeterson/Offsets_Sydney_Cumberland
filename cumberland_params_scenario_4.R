@@ -24,7 +24,7 @@ initialise_user_global_params <- function(folder_to_use){
   
   global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'simulation_inputs_jan_17/')
   
-  global_params$time_steps = 5
+  global_params$time_steps = 37
   global_params$features_to_use_in_simulation = 1:5
   
   global_params$store_zeros_as_sparse = TRUE
@@ -80,7 +80,7 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
   # dependant on the total number of parcels.
-  simulation_params$unregulated_loss_prob = 0.001
+  simulation_params$unregulated_loss_prob = 0 # 0.001
   
   # The total number of layers to use in the offset calcuation (iterating from the start)
   # Need to keep these as is to use veg integrity score

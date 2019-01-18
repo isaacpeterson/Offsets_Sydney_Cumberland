@@ -39,7 +39,7 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 1
+  global_params$realisation_num = 37
   
   global_params$save_simulation_outputs = TRUE
   
@@ -87,7 +87,7 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
   # dependant on the total number of parcels.
-  simulation_params$unregulated_loss_prob = 0.001
+  simulation_params$unregulated_loss_prob = 0 #0.001
   
   # The total number of layers to use in the offset calcuation (iterating from the start)
   # Need to keep these as is to use veg integrity score
