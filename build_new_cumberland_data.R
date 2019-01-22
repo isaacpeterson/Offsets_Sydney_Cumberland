@@ -159,10 +159,11 @@ build_params$priority_data_filenames = paste0(build_params$data_folder, "All_Veg
 # mapping done by BIOSIS provided as shape files.
 
 build_params$priority_data_att_filenames = c('AllVegetation_CumberlandPlain')
+build_params$cadastre_filename = "cadastre_withconstraints_rem1ha-non-veg_areas.tif"
+build_params$growthareas_filename = "GrowthAreas.tif"
+cadastre_ind = which(build_params$data_filenames == build_params$cadastre_filename)
 
-cadastre_ind = which(build_params$data_filenames == "cadastre_withconstraints.tif")
-
-GrowthAreas_ind = which(build_params$data_filenames == "GrowthAreas.tif")
+GrowthAreas_ind = which(build_params$data_filenames == build_params$growthareas_filename)
 
 data_rasters = setNames(lapply(seq_along(build_params$data_filenames), 
                                function(i) offsetsim::load_rasters(paste0(build_params$data_folder, build_params$data_filenames[i]), features_to_use = 'all')), build_params$data_filenames)

@@ -111,10 +111,10 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   simulation_params$limit_offset_restoration = TRUE
   
   # Exclude parcels with less than this number of pixels.
-  simulation_params$min_site_screen_size = 5
+  simulation_params$min_site_screen_size = 0
 
   # Removing the very largest parcels in the top 0.1% of the size distribution.
-  simulation_params$max_site_screen_size_quantile = 0.999
+  simulation_params$max_site_screen_size_quantile = 1
   
 
   #   c('net_gains', 'restoration_gains', 'avoided_condition_decline', 'avoided_loss',

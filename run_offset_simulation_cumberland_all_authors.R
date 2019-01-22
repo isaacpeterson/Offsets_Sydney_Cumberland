@@ -1,6 +1,6 @@
 library(offsetsim)
 
-scenario_num = 3
+scenario_num = 2
 
 source(paste0('cumberland_params_scenario_', scenario_num, '.R'))
 

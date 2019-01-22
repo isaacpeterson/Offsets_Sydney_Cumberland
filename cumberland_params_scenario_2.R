@@ -27,7 +27,7 @@ initialise_user_global_params <- function(folder_to_use){
   # Need to keep these as is to use veg integrity score
   
   # How long to run the simulaton in years
-  global_params$time_steps = 37 # 50
+  global_params$time_steps = 15 # 50
   
   global_params$features_to_use_in_simulation = 1:5
   
@@ -39,7 +39,7 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 2
+  global_params$realisation_num = 1
   
   global_params$save_simulation_outputs = TRUE
   
@@ -115,10 +115,10 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   simulation_params$limit_offset_restoration = TRUE
   
   # Exclude parcels with less than this number of pixels.
-  simulation_params$min_site_screen_size = 5
+  simulation_params$min_site_screen_size = 0
 
   # Removing the very largest parcels in the top 0.1% of the size distribution.
-  simulation_params$max_site_screen_size_quantile = 0.999
+  simulation_params$max_site_screen_size_quantile = 1
   
 
   #   c('net_gains', 'restoration_gains', 'avoided_condition_decline', 'avoided_loss',
