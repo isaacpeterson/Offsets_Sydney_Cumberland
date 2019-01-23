@@ -14,7 +14,7 @@ initialise_user_global_params <- function(folder_to_use){
                                                           full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                           include.dirs = FALSE, no.. = FALSE)))
   
-  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 'cadastre_withconstraints.tif')
+  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 'cadastre_withconstraints_rem1ha-non-veg_areas.tif')
   
   global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
                                                       (list.files(path = paste0(simulation_base_folder, 'simulation_inputs_jan_17/'),
@@ -80,7 +80,7 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
   # dependant on the total number of parcels.
-  simulation_params$unregulated_loss_prob = 0.001
+  simulation_params$unregulated_loss_prob = 0
   
   # The total number of layers to use in the offset calcuation (iterating from the start)
   # Need to keep these as is to use veg integrity score
@@ -241,7 +241,7 @@ initialise_user_feature_params <- function(current_author_splines){
   feature_params$update_management_dynamics_by_differential = TRUE
   feature_params$update_background_dynamics_by_differential = TRUE
   
-  feature_params$perform_management_dynamics_time_shift = FALSE
+  feature_params$perform_management_dynamics_time_shift = TRUE
   feature_params$perform_background_dynamics_time_shift = FALSE
   
   feature_params$sample_management_dynamics = TRUE
