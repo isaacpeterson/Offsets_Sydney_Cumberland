@@ -14,7 +14,7 @@ initialise_user_global_params <- function(folder_to_use){
                                                           full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
                                                           include.dirs = FALSE, no.. = FALSE)))
   
-  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 'cadastre_withconstraints.tif')
+  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 'cadastre_withconstraints_rem1ha-non-veg_areas.tif')
   
   global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
                                                       (list.files(path = paste0(simulation_base_folder, 'simulation_inputs_jan_17/'),
@@ -108,10 +108,10 @@ initialise_user_simulation_params <- function(simulated_time_steps){
   simulation_params$limit_offset_restoration = TRUE
   
   # Exclude parcels with less than this number of pixels.
-  simulation_params$min_site_screen_size = 5
+  simulation_params$min_site_screen_size = 0
   
   # Removing the very largest parcels in the top 0.1% of the size distribution.
-  simulation_params$max_site_screen_size_quantile = 0.999
+  simulation_params$max_site_screen_size_quantile = 1
   
   #   c('net_gains', 'restoration_gains', 'avoided_condition_decline', 'avoided_loss',
   #     'protected_condition', 'current_condition', 'restored_condition')
@@ -241,7 +241,7 @@ initialise_user_feature_params <- function(current_author_splines){
   feature_params$update_management_dynamics_by_differential = TRUE
   feature_params$update_background_dynamics_by_differential = TRUE
   
-  feature_params$perform_management_dynamics_time_shift = FALSE
+  feature_params$perform_management_dynamics_time_shift = TRUE
   feature_params$perform_background_dynamics_time_shift = FALSE
   
   feature_params$sample_management_dynamics = TRUE

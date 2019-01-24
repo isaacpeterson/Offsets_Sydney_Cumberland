@@ -159,10 +159,11 @@ build_params$priority_data_filenames = paste0(build_params$data_folder, "All_Veg
 # mapping done by BIOSIS provided as shape files.
 
 build_params$priority_data_att_filenames = c('AllVegetation_CumberlandPlain')
+build_params$cadastre_filename = "cadastre_withconstraints_rem1ha-non-veg_areas.tif"
+build_params$growthareas_filename = "GrowthAreas.tif"
+cadastre_ind = which(build_params$data_filenames == build_params$cadastre_filename)
 
-cadastre_ind = which(build_params$data_filenames == "cadastre_withconstraints.tif")
-
-GrowthAreas_ind = which(build_params$data_filenames == "GrowthAreas.tif")
+GrowthAreas_ind = which(build_params$data_filenames == build_params$growthareas_filename)
 
 data_rasters = setNames(lapply(seq_along(build_params$data_filenames), 
                                function(i) offsetsim::load_rasters(paste0(build_params$data_folder, build_params$data_filenames[i]), features_to_use = 'all')), build_params$data_filenames)
@@ -219,6 +220,51 @@ if (build_params$run_build_site_characteristics == TRUE){
 # above and hence, all zero parcels will have a site index of "1". We want to
 # remove them from the analysis as these aren't used. This is why
 # site_indexes_to_exclude is set to "1" below.
+
+
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+
+data_arrays_to_use = vector('list', 2)
+data_arrays_to_use[[1]] = 1*(data_arrays[[7]] == 1)
+data_arrays_to_use[[2]] = 1*(data_arrays[[7]] == 2)
+names(data_arrays_to_use) = c('biobank', 'other_conservation')
+
+probability_list_to_use = setNames(lapply(seq_along(data_arrays_to_use), 
+                                          function(i) calc_intervention_probability(data_arrays_to_use[[i]],
+                                                                                    site_characteristics$land_parcels, 
+                                                                                    site_indexes_to_exclude = 1)), 
+                                   names(data_arrays_to_use))
+
+
+offsetsim::save_simulation_inputs(probability_list_to_use, build_params$simulation_inputs_folder)
+
+feature_dynamics = readRDS(paste0(build_params$simulation_inputs_folder, 'feature_dynamics.rds'))
+
+management_dynamics_high_intensity = readRDS(paste0(build_params$simulation_inputs_folder, 'management_dynamics_high_intensity.rds'))
+management_dynamics_low_intensity = readRDS(paste0(build_params$simulation_inputs_folder, 'management_dynamics_low_intensity.rds'))
+
+biobank_set_to_use = which(unlist(probability_list_to_use$biobank) > 0)
+other_cons_set_to_use = which(unlist(probability_list_to_use$other_conservation) > 0)
+
+feature_dynamics_with_management = feature_dynamics
+feature_dynamics_with_management[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
+feature_dynamics_with_management[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
+
+saveRDS(feature_dynamics_with_management, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_with_management.rds'))
+
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+
+
+
+
+
+
 
 if (build_params$build_probability_list == TRUE){
   
