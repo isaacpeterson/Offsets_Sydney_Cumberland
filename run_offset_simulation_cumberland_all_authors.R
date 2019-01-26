@@ -1,6 +1,6 @@
 library(offsetsim)
 
-scenario_num = 1
+scenario_num = 6
 
 source('global_scenario_params_set.R')
 user_output_params <- initialise_user_output_params()
@@ -9,7 +9,8 @@ user_feature_params_global <- initialise_user_feature_params_global()
 
 source(paste0('cumberland_params_scenario_', scenario_num, '.R'))
 
-author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
+#author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
+author_names = c( 'mean' )
 
 management_index_set = c(1, 1, 2, 3, 2, 3)
 # author_names = 'mean_splines.rds'
