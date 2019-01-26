@@ -194,7 +194,7 @@ feature_ID_layers = append(feature_ID_layers, list(cumberland_layer))
 # in "cad_rst_exprt.tiff".  The IDs in this layer extrated via uique and sort,
 # and then renumbered starting from zero. Thus the ID of parcels to remove
 # need to mapped to correspond to this. 
-
+browser()
 if (build_params$run_build_site_characteristics == TRUE){
   cat('\nbuilding site_characteristics...')
   site_characteristics = offsetsim::build_site_characteristics(data_arrays[[cadastre_ind]])
@@ -222,39 +222,56 @@ if (build_params$run_build_site_characteristics == TRUE){
 # site_indexes_to_exclude is set to "1" below.
 
 
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 
+browser()
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+# 
+block_to_use = which(names(data_arrays) == 'NPWSE_biobank.tif')
 data_arrays_to_use = vector('list', 2)
-data_arrays_to_use[[1]] = 1*(data_arrays[[7]] == 1)
-data_arrays_to_use[[2]] = 1*(data_arrays[[7]] == 2)
+data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
+data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
 names(data_arrays_to_use) = c('biobank', 'other_conservation')
-
+ 
 probability_list_to_use = setNames(lapply(seq_along(data_arrays_to_use), 
-                                          function(i) calc_intervention_probability(data_arrays_to_use[[i]],
-                                                                                    site_characteristics$land_parcels, 
-                                                                                    site_indexes_to_exclude = 1)), 
-                                   names(data_arrays_to_use))
-
-
+                                         function(i) calc_intervention_probability(data_arrays_to_use[[i]],
+                                                                                     site_characteristics$land_parcels, 
+                                                                                     site_indexes_to_exclude = 1)), 
+                                    names(data_arrays_to_use))
+ 
 offsetsim::save_simulation_inputs(probability_list_to_use, build_params$simulation_inputs_folder)
-
 feature_dynamics = readRDS(paste0(build_params$simulation_inputs_folder, 'feature_dynamics.rds'))
 
 management_dynamics_high_intensity = readRDS(paste0(build_params$simulation_inputs_folder, 'management_dynamics_high_intensity.rds'))
 management_dynamics_low_intensity = readRDS(paste0(build_params$simulation_inputs_folder, 'management_dynamics_low_intensity.rds'))
-
+ 
 biobank_set_to_use = which(unlist(probability_list_to_use$biobank) > 0)
 other_cons_set_to_use = which(unlist(probability_list_to_use$other_conservation) > 0)
 
-feature_dynamics_with_management = feature_dynamics
-feature_dynamics_with_management[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
-feature_dynamics_with_management[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
+feature_dynamics_with_high_biobank_low_other = feature_dynamics
+feature_dynamics_with_high_biobank_low_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
+feature_dynamics_with_high_biobank_low_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
+saveRDS(feature_dynamics_with_high_biobank_low_other, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_high_biobank_low_other.rds'))
 
-saveRDS(feature_dynamics_with_management, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_with_management.rds'))
+feature_dynamics_with_high_biobank_high_other = feature_dynamics
+feature_dynamics_with_high_biobank_high_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
+feature_dynamics_with_high_biobank_high_other[other_cons_set_to_use] = management_dynamics_high_intensity[other_cons_set_to_use]
+saveRDS(feature_dynamics_with_high_biobank_high_other, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_high_biobank_high_other.rds'))
 
+feature_dynamics_with_low_biobank_low_other = feature_dynamics
+feature_dynamics_with_low_biobank_low_other[biobank_set_to_use] = management_dynamics_low_intensity[biobank_set_to_use]
+feature_dynamics_with_low_biobank_low_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
+saveRDS(feature_dynamics_with_low_biobank_low_other, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_low_biobank_low_other.rds'))
+
+feature_dynamics_with_low_biobank_high_other = feature_dynamics
+feature_dynamics_with_low_biobank_high_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
+feature_dynamics_with_low_biobank_high_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
+saveRDS(feature_dynamics_with_low_biobank_high_other, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_low_biobank_high_other.rds'))
+
+
+# 
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
