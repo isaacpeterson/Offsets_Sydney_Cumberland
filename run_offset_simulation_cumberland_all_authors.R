@@ -7,7 +7,8 @@ user_output_params <- initialise_user_output_params()
 user_simulation_params_global <- initialise_user_simulation_params_global()
 user_feature_params_global <- initialise_user_feature_params_global()
 
-source(paste0('cumberland_params_scenario_', scenario_num, '.R'))
+source_filename <- paste0('cumberland_params_scenario_', scenario_num, '.R')
+source(source_filename)
 
 #author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
 author_names = c( 'mean' )
