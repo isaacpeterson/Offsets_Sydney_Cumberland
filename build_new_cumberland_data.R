@@ -13,49 +13,73 @@ library(offsetsim)
 build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, current_data_attributes, 
                                 condition_class_vals, feature_params, condition_class_bounds, modify_means, means_modifier){
   
-  if (length(PCT_set_to_use) == 0){
-    current_feature = vector()
-  } else {
+  current_feature = matrix(0, dim(current_ID_array)[1], dim(current_ID_array)[2])
+  
+  if (length(PCT_set_to_use) > 0){
     
-    current_condition_class_set = current_data_attributes$condition[PCT_set_to_use] 
+    current_condition_class_set = current_data_attributes$condition[PCT_set_to_use]
     current_object_ID_set = current_data_attributes$object_ID[PCT_set_to_use]
-    current_feature = matrix(0, dim(current_ID_array)[1], dim(current_ID_array)[2])
     
-    # running through all the polygon IDs
-    for (ID_ind in seq_along(current_object_ID_set)){
+    if (feature_type == 'condition_class'){
+      condition_class_blocks = lapply(seq_along(condition_class_vals$veg_type), function(i) which(current_condition_class_set == as.character(condition_class_vals$veg_type[i])))
+      condition_class_IDs = lapply(seq_along(condition_class_blocks), function(i) current_object_ID_set[condition_class_blocks[[i]]])
       
-      current_element_set = which(current_ID_array %in% current_object_ID_set[ID_ind])
-      current_condition_class_mode = as.numeric(condition_class_vals[, 2][ match(current_condition_class_set[ID_ind], condition_class_vals[, 1]) ])
+      grouped_element_IDs = lapply(seq_along(condition_class_blocks), function(i) which(current_ID_array %in% condition_class_IDs[[i]]))
+      element_vals = lapply(seq_along(condition_class_blocks), function(i) rep(condition_class_vals$value[i], length(grouped_element_IDs[[i]])))
+  
+    } else if (feature_type == 'Feature_Value'){
       
-      if (feature_type == 'condition_Class'){
-        #make the condition class layer (each polygon of veg is composed of elements with the same value)
-        current_element_vals = rep(current_condition_class_mode, length(current_element_set))
-        
-      } else if (feature_type == 'Feature_Value'){
-        
-        # Call OSIM function to sample feature values given condition class and condition class bounds
-        
-        # Modify this condition_class_bounds is a nested list with info on the min, max and mean for each of the given conditions. 
-        # Want to alter the mean values in condition_class_bounds to be able make 
-        
-        if (modify_means == TRUE){
-          current_condition_class_bounds = lapply(seq_along(condition_class_bounds), 
-                                                  function(i) modify_mean(condition_class_bounds[[i]],
-                                                                          means_modifier[[ID_ind]]))
-        } 
-        
-        current_element_vals = offsetsim::simulate_site_feature_elements(feature_params$site_sample_type,
-                                                                         current_condition_class_mode,
-                                                                         current_condition_class_bounds,
-                                                                         element_num = length(current_element_set),
-                                                                         feature_params$initial_site_sd, 
-                                                                         feature_params$initial_site_mean_sd)
+      if (modify_means == TRUE){
+        condition_class_bounds_set <- lapply(seq_along(current_object_ID_set), function(i) lapply(seq_along(condition_class_bounds), 
+                                                                                                  function(j) modify_mean(condition_class_bounds[[j]],
+                                                                                                                          means_modifier[[i]])))
+      } else {
+        condition_class_bounds_set <- rep(list(condition_class_bounds), length(current_object_ID_set))
       }
       
-      current_feature[current_element_set] = current_element_vals
+      condition_class_modes <- condition_class_vals$value[match(current_condition_class_set, as.character(condition_class_vals$veg_type))]
       
+      grouped_element_IDs = lapply(seq_along(current_object_ID_set), function(i) which(current_ID_array %in% current_object_ID_set[i]))
+      
+      element_vals <- lapply(seq_along(current_object_ID_set), function(i) offsetsim::simulate_site_feature_elements(feature_params$site_sample_type,
+                                                                                                                     condition_class_modes[i],
+                                                                                                                     condition_class_bounds_set[[i]],
+                                                                                                                     element_num = length(grouped_element_IDs[[i]]),
+                                                                                                                     feature_params$initial_site_sd, 
+                                                                                                                     feature_params$initial_site_mean_sd))
+      
+      # running through all the polygon IDs
+      #       for (ID_ind in seq_along(current_object_ID_set)){
+      #         
+      #         current_element_set = which(current_ID_array %in% current_object_ID_set[ID_ind])
+      #         current_condition_class_mode = as.numeric(condition_class_vals$value[ match(current_condition_class_set[ID_ind], condition_class_vals$veg_type) ])
+      #         
+      #         # Call OSIM function to sample feature values given condition class and condition class bounds
+      #         
+      #         # Modify this condition_class_bounds is a nested list with info on the min, max and mean for each of the given conditions. 
+      #         # Want to alter the mean values in condition_class_bounds to be able make 
+      #         
+      #         if (modify_means == TRUE){
+      #           current_condition_class_bounds = lapply(seq_along(condition_class_bounds), 
+      #                                                   function(i) modify_mean(condition_class_bounds[[i]],
+      #                                                                           means_modifier[[ID_ind]]))
+      #         } 
+      #         
+      #         current_element_vals = offsetsim::simulate_site_feature_elements(feature_params$site_sample_type,
+      #                                                                          current_condition_class_mode,
+      #                                                                          current_condition_class_bounds,
+      #                                                                          element_num = length(current_element_set),
+      #                                                                          feature_params$initial_site_sd, 
+      #                                                                          feature_params$initial_site_mean_sd)
+      #         
+      #         current_feature[current_element_set] = current_element_vals
+      #         
+      #       }
     }
-  } 
+    
+    current_feature[unlist(grouped_element_IDs)] = unlist(element_vals)
+    
+  }
   return(current_feature)
 }
 
@@ -107,10 +131,9 @@ build_params$build_probability_list = FALSE
 build_params$save_probability_list = FALSE
 
 build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_jan_16/')
-build_params$output_data_folder = '/Users/E24661/offset_data/Sydney_Cumberland_Data/new_prepared_data/'
 build_params$data_attribute_folder = build_params$data_folder
 build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/')
-
+build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data/')
 # This is how the parcel size sampling is done Specify area size classes for
 # sampling condition. If want to use different size classes, change this vector.
 # This is based on the freq distribution of the shape_area values for each PGA
@@ -130,19 +153,22 @@ build_params$min_data_count = 50
 # only use PCT 849
 build_params$PCT_to_use = 849 #unique(priority_condition_set$PCT)
 
-build_params$condition_class_vals = matrix( ncol=2, byrow=TRUE, 
-                                            c('Intact', 4,
-                                              'Thinned', 3,
-                                              ' ', 0, 
-                                              'Scattered Paddock Trees', 1,
-                                              'DNG (to be confirmed)', 0, 
-                                              'DNG', 0, 
-                                              'Urban native / exotic', 0, 
-                                              'Scattered Trees', 2,
-                                              'Exotic', 0, 
-                                              'Dam', 0, 
-                                              'Scattered trees', 2, 
-                                              'Infrastructure', 0))
+build_params$condition_class_vals = setNames(data.frame(c('Intact', 
+                                                          'Thinned', 
+                                                          ' ', 
+                                                          'Scattered Paddock Trees', 
+                                                          'DNG (to be confirmed)', 
+                                                          'DNG', 
+                                                          'Urban native / exotic', 
+                                                          'Scattered Trees', 
+                                                          'Exotic', 
+                                                          'Dam', 
+                                                          'Scattered trees', 
+                                                          'Infrastructure'), 
+                                                        c(4, 3, 0, 2, 0, 0, 1, 2, 0, 0, 2, 0)), 
+                                             c('veg_type', 'value'))
+
+
 
 # Note that raster_to_array also removes all NAs and turns them into zeros.
 
@@ -194,23 +220,23 @@ feature_ID_layers = append(feature_ID_layers, list(cumberland_layer))
 # in "cad_rst_exprt.tiff".  The IDs in this layer extrated via uique and sort,
 # and then renumbered starting from zero. Thus the ID of parcels to remove
 # need to mapped to correspond to this. 
-browser()
+
 if (build_params$run_build_site_characteristics == TRUE){
   cat('\nbuilding site_characteristics...')
   site_characteristics = offsetsim::build_site_characteristics(data_arrays[[cadastre_ind]])
   
-  saveRDS(object = site_characteristics, file = paste0(build_params$simulation_inputs_folder, 'site_characteristics.rds'))
+  saveRDS(object = site_characteristics, file = paste0(build_params$output_data_folder, 'site_characteristics.rds'))
   
   paste0('site_characteristics object built at ',
          round(difftime(Sys.time(), sim_time), 1), 
          units(difftime(Sys.time(), sim_time)))
   
-  cat('\nsaved site_characteristics object to ', paste0(build_params$simulation_inputs_folder, 'site_characteristics.rds'))
+  cat('\nsaved site_characteristics object to ', paste0(build_params$output_data_folder, 'site_characteristics.rds'))
   
 } else {
-  if (file.exists(paste0(build_params$simulation_inputs_folder, 'site_characteristics.rds'))){
+  if (file.exists(paste0(build_params$output_data_folder, 'site_characteristics.rds'))){
     paste0('loading site_characteristics object from file')
-    site_characteristics = readRDS(paste0(build_params$simulation_inputs_folder, 'site_characteristics.rds'))
+    site_characteristics = readRDS(paste0(build_params$output_data_folder, 'site_characteristics.rds'))
   }
 }
 
@@ -223,64 +249,59 @@ if (build_params$run_build_site_characteristics == TRUE){
 
 
 
-browser()
+
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 # 
-block_to_use = which(names(data_arrays) == 'NPWSE_biobank.tif')
-data_arrays_to_use = vector('list', 2)
-data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
-data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
-names(data_arrays_to_use) = c('biobank', 'other_conservation')
- 
-probability_list_to_use = setNames(lapply(seq_along(data_arrays_to_use), 
-                                         function(i) calc_intervention_probability(data_arrays_to_use[[i]],
-                                                                                     site_characteristics$land_parcels, 
-                                                                                     site_indexes_to_exclude = 1)), 
-                                    names(data_arrays_to_use))
- 
-offsetsim::save_simulation_inputs(probability_list_to_use, build_params$simulation_inputs_folder)
-feature_dynamics = readRDS(paste0(build_params$simulation_inputs_folder, 'feature_dynamics.rds'))
-
-management_dynamics_high_intensity = readRDS(paste0(build_params$simulation_inputs_folder, 'management_dynamics_high_intensity.rds'))
-management_dynamics_low_intensity = readRDS(paste0(build_params$simulation_inputs_folder, 'management_dynamics_low_intensity.rds'))
- 
-biobank_set_to_use = which(unlist(probability_list_to_use$biobank) > 0)
-other_cons_set_to_use = which(unlist(probability_list_to_use$other_conservation) > 0)
-
-feature_dynamics_with_high_biobank_low_other = feature_dynamics
-feature_dynamics_with_high_biobank_low_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
-feature_dynamics_with_high_biobank_low_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
-saveRDS(feature_dynamics_with_high_biobank_low_other, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_high_biobank_low_other.rds'))
-
-feature_dynamics_with_high_biobank_high_other = feature_dynamics
-feature_dynamics_with_high_biobank_high_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
-feature_dynamics_with_high_biobank_high_other[other_cons_set_to_use] = management_dynamics_high_intensity[other_cons_set_to_use]
-saveRDS(feature_dynamics_with_high_biobank_high_other, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_high_biobank_high_other.rds'))
-
-feature_dynamics_with_low_biobank_low_other = feature_dynamics
-feature_dynamics_with_low_biobank_low_other[biobank_set_to_use] = management_dynamics_low_intensity[biobank_set_to_use]
-feature_dynamics_with_low_biobank_low_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
-saveRDS(feature_dynamics_with_low_biobank_low_other, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_low_biobank_low_other.rds'))
-
-feature_dynamics_with_low_biobank_high_other = feature_dynamics
-feature_dynamics_with_low_biobank_high_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
-feature_dynamics_with_low_biobank_high_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
-saveRDS(feature_dynamics_with_low_biobank_high_other, paste0(build_params$simulation_inputs_folder, 'feature_dynamics_low_biobank_high_other.rds'))
-
+# block_to_use = which(names(data_arrays) == 'NPWSE_biobank.tif')
+# data_arrays_to_use = vector('list', 2)
+# data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
+# data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
+# names(data_arrays_to_use) = c('biobank', 'other_conservation')
+#  
+# probability_list_to_use = setNames(lapply(seq_along(data_arrays_to_use), 
+#                                          function(i) calc_intervention_probability(data_arrays_to_use[[i]],
+#                                                                                      site_characteristics$land_parcels, 
+#                                                                                      site_indexes_to_exclude = 1)), 
+#                                     names(data_arrays_to_use))
+#  
+# offsetsim::save_simulation_inputs(probability_list_to_use, build_params$output_data_folder)
+# feature_dynamics = readRDS(paste0(build_params$output_data_folder, 'feature_dynamics.rds'))
+# 
+# management_dynamics_high_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_high_intensity.rds'))
+# management_dynamics_low_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_low_intensity.rds'))
+#  
+# biobank_set_to_use = which(unlist(probability_list_to_use$biobank) > 0)
+# other_cons_set_to_use = which(unlist(probability_list_to_use$other_conservation) > 0)
+# 
+# feature_dynamics_with_high_biobank_low_other = feature_dynamics
+# feature_dynamics_with_high_biobank_low_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
+# feature_dynamics_with_high_biobank_low_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
+# saveRDS(feature_dynamics_with_high_biobank_low_other, paste0(build_params$output_data_folder, 'feature_dynamics_high_biobank_low_other.rds'))
+# 
+# feature_dynamics_with_high_biobank_high_other = feature_dynamics
+# feature_dynamics_with_high_biobank_high_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
+# feature_dynamics_with_high_biobank_high_other[other_cons_set_to_use] = management_dynamics_high_intensity[other_cons_set_to_use]
+# saveRDS(feature_dynamics_with_high_biobank_high_other, paste0(build_params$output_data_folder, 'feature_dynamics_high_biobank_high_other.rds'))
+# 
+# feature_dynamics_with_low_biobank_low_other = feature_dynamics
+# feature_dynamics_with_low_biobank_low_other[biobank_set_to_use] = management_dynamics_low_intensity[biobank_set_to_use]
+# feature_dynamics_with_low_biobank_low_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
+# saveRDS(feature_dynamics_with_low_biobank_low_other, paste0(build_params$output_data_folder, 'feature_dynamics_low_biobank_low_other.rds'))
+# 
+# feature_dynamics_with_low_biobank_high_other = feature_dynamics
+# feature_dynamics_with_low_biobank_high_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
+# feature_dynamics_with_low_biobank_high_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
+# saveRDS(feature_dynamics_with_low_biobank_high_other, paste0(build_params$output_data_folder, 'feature_dynamics_low_biobank_high_other.rds'))
+# 
 
 # 
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
 ########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-
-
-
-
-
 
 
 if (build_params$build_probability_list == TRUE){
@@ -298,7 +319,7 @@ if (build_params$build_probability_list == TRUE){
   
   # Save the objects the output folder, save to file with the same name as the sublists (eg dev_probability_list)
   if (build_params$save_probability_list == TRUE){
-    offsetsim::save_simulation_inputs(probability_list, build_params$simulation_inputs_folder)
+    offsetsim::save_simulation_inputs(probability_list, build_params$output_data_folder)
   }
 }
 
@@ -452,29 +473,39 @@ for (data_ind in seq_along(data_attributes)){
     PCT_set_to_use = which(data_attributes[[data_ind]]$PCT == build_params$PCT_to_use[PCT_ind])
     
     # Takes the data attributes table together with the polygon IDs and turns them into a matrix (to be written as a raster file later)
-    # Note, the feature_type = 'condition_Class', specified that this function will be sampling from condition classes
+    # Note, the feature_type = 'condition_class', specified that this function will be sampling from condition classes
     
-    current_feature = build_feature_layer(feature_type = 'condition_Class', 
-                                          PCT_set_to_use, 
-                                          current_ID_array = feature_ID_layers[[data_ind]], 
-                                          current_data_attributes = data_attributes[[data_ind]], 
-                                          build_params$condition_class_vals, 
-                                          feature_params, 
-                                          condition_class_bounds = vector(), 
-                                          modify_means = FALSE, 
-                                          means_modifier = vector())
+    condition_class_set[[data_ind]][[PCT_ind]] = build_feature_layer(feature_type = 'condition_class', 
+                                                                     PCT_set_to_use, 
+                                                                     current_ID_array = feature_ID_layers[[data_ind]], 
+                                                                     current_data_attributes = data_attributes[[data_ind]], 
+                                                                     build_params$condition_class_vals, 
+                                                                     feature_params, 
+                                                                     condition_class_bounds = vector(), 
+                                                                     modify_means = FALSE, 
+                                                                     means_modifier = vector())
     
-    # This dealing with the overlaps between the Biosis PGA veg mapping and the Cumberland west veg mapping
-    # for the overlap area use the biosis values
-    
-    if (names(data_attributes)[data_ind] ==  'cumberland_att'){
-      # outside PGAs so use sampled data
-      current_feature = current_feature*(1 - data_arrays[[GrowthAreas_ind]])
-    } else {
-      # Use Biosis data
-      current_feature = current_feature*data_arrays[[GrowthAreas_ind]]
-    }
-    condition_class_set[[data_ind]][[PCT_ind]] = current_feature
+    #     current_feature = build_feature_layer(feature_type = 'condition_class', 
+    #                                           PCT_set_to_use, 
+    #                                           current_ID_array = feature_ID_layers[[data_ind]], 
+    #                                           current_data_attributes = data_attributes[[data_ind]], 
+    #                                           build_params$condition_class_vals, 
+    #                                           feature_params, 
+    #                                           condition_class_bounds = vector(), 
+    #                                           modify_means = FALSE, 
+    #                                           means_modifier = vector())
+    #     
+    #     # This dealing with the overlaps between the Biosis PGA veg mapping and the Cumberland west veg mapping
+    #     # for the overlap area use the biosis values
+    #     
+    #     if (names(data_attributes)[data_ind] ==  'cumberland_att'){
+    #       # outside PGAs so use sampled data
+    #       current_feature = current_feature*(1 - data_arrays[[GrowthAreas_ind]])
+    #     } else {
+    #       # Use Biosis data
+    #       current_feature = current_feature*data_arrays[[GrowthAreas_ind]]
+    #     }
+    #     condition_class_set[[data_ind]][[PCT_ind]] = current_feature
     
   }
   
@@ -483,11 +514,9 @@ for (data_ind in seq_along(data_attributes)){
 }
 
 
-  
 paste0('condition classes built at ',
        round(difftime(Sys.time(), sim_time), 1), 
        units(difftime(Sys.time(), sim_time)))
-
 
 # for each PCT, add the PGA condition array to the sampled condition array.
 
@@ -497,7 +526,6 @@ for (PCT_ind in seq_along(build_params$PCT_to_use)){
   inds_to_use = which(unlist(lapply(seq_along(condition_class_set), function(i) length(condition_class_set[[i]][[PCT_ind]]) > 0)))
   merged_condition_classes[[PCT_ind]] = Reduce('+', lapply(inds_to_use, function(i) condition_class_set[[i]][[PCT_ind]]))
 }
-
 
 # write out the condition class rasters that are used by the simulation to split features per condition class per site
 # if these are not supplied the simulation will assign the condition classes internally - which is a problem for this project
@@ -512,7 +540,7 @@ for (PCT_ind in seq_along(build_params$PCT_to_use)){
 }
 
 
-print('building condition values')
+
 # ----------------------
 # Building the condition value array which gives the condition value of each pixel to then write them to raster layers for each feature 
 # ----------------------
@@ -529,6 +557,7 @@ print('building condition values')
 #splitting them apart. Note that this would ideally be calculated dynamically in situ as the simulation is running to account for the changes in the distribution
 # of sites as the simulation proceeds
 
+print('building condition values')
 means_modifier = runif(min = -1, max = 1, length(which(data_attributes[[data_ind]]$PCT == build_params$PCT_to_use)))
 
 condition_vals_set = lapply(seq_along(data_attributes), 
@@ -543,24 +572,36 @@ for (data_ind in seq_along(data_attributes)){
     for (feature_ind in seq(feature_params$simulated_feature_num)){
       
       # Note, the feature_type = 'Feature_Value', means sampling actual condtion values for each pixel.
-      current_feature = build_feature_layer(feature_type = 'Feature_Value', 
-                                            PCT_set_to_use, 
-                                            current_ID_array = feature_ID_layers[[data_ind]], 
-                                            current_data_attributes = data_attributes[[data_ind]], 
-                                            build_params$condition_class_vals, 
-                                            feature_params, 
-                                            # Note these are where the condition class bounds come from 
-                                            condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]], 
-                                            modify_means = TRUE, 
-                                            means_modifier)
       
-      if (names(data_attributes)[data_ind] ==  'cumberland_att'){
-        current_feature = current_feature*(1 - data_arrays[[GrowthAreas_ind]])
-      } else {
-        current_feature = current_feature*data_arrays[[GrowthAreas_ind]]
-      }
+      condition_vals_set[[data_ind]][[PCT_ind]][[feature_ind]] = build_feature_layer(feature_type = 'Feature_Value', 
+                                                                                     PCT_set_to_use, 
+                                                                                     current_ID_array = feature_ID_layers[[data_ind]], 
+                                                                                     current_data_attributes = data_attributes[[data_ind]], 
+                                                                                     build_params$condition_class_vals, 
+                                                                                     feature_params, 
+                                                                                     # Note these are where the condition class bounds come from 
+                                                                                     condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]], 
+                                                                                     modify_means = TRUE, 
+                                                                                     means_modifier)
       
-      condition_vals_set[[data_ind]][[PCT_ind]][[feature_ind]] = current_feature
+      #       current_feature = build_feature_layer(feature_type = 'Feature_Value', 
+      #                                             PCT_set_to_use, 
+      #                                             current_ID_array = feature_ID_layers[[data_ind]], 
+      #                                             current_data_attributes = data_attributes[[data_ind]], 
+      #                                             build_params$condition_class_vals, 
+      #                                             feature_params, 
+      #                                             # Note these are where the condition class bounds come from 
+      #                                             condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]], 
+      #                                             modify_means = TRUE, 
+      #                                             means_modifier)
+      #       
+      #       if (names(data_attributes)[data_ind] ==  'cumberland_att'){
+      #         current_feature = current_feature*(1 - data_arrays[[GrowthAreas_ind]])
+      #       } else {
+      #         current_feature = current_feature*data_arrays[[GrowthAreas_ind]]
+      #       }
+      #       
+      #       condition_vals_set[[data_ind]][[PCT_ind]][[feature_ind]] = current_feature
     }
     paste0('feature ', feature_ind, 'values built at ',
            round(difftime(Sys.time(), sim_time), 1), 
@@ -569,7 +610,7 @@ for (data_ind in seq_along(data_attributes)){
 }
 
 
-  
+
 
 
 paste0('condition values built at ',
