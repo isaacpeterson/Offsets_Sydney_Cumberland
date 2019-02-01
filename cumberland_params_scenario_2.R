@@ -1,8 +1,7 @@
 #development only
 initialise_user_simulation_params <- function(simulation_params, simulated_time_steps){ 
   
-
-  simulation_params$use_offset_bank = FALSE
+  simulation_params$use_offset_bank = TRUE
   simulation_params$banked_offset_selection_type = 'pre_determined'  
   simulation_params$offset_bank_type = 'credit' 
   
