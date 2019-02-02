@@ -3,8 +3,8 @@ initialise_user_global_params <- function(folder_to_use){
   
   global_params = list()
   
-  simulation_base_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  #simulation_base_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
+  #simulation_base_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  simulation_base_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
   global_params$simulation_folder = paste0(simulation_base_folder, folder_to_use, '/')
   
   global_params$feature_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
@@ -38,12 +38,15 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 1
+  global_params$realisation_num = 4
   
   global_params$save_simulation_outputs = TRUE
   
+  global_params$save_background_cfacs = FALSE
+  
   # Builds site_characteristics object. Note for Cumberland analysis always
   # want this to be FALSE as this is built in initialise_cumberland_data.R
+  
   global_params$overwrite_site_characteristics = FALSE
   
   global_params$run_from_simulated_data = FALSE
@@ -54,6 +57,7 @@ initialise_user_global_params <- function(folder_to_use){
   # of being developed and offset which you DON'T WANT if running development
   # in the PGAs. So these should be set to FALSE for if specifying dev and
   # offset areas in initialise_cumberland_data.R.
+  
   global_params$overwrite_dev_probability_list = FALSE
   global_params$overwrite_offset_probability_list = FALSE
   global_params$overwrite_unregulated_probability_list = FALSE
@@ -320,8 +324,8 @@ initialise_user_output_params <- function(){
   
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
   
-  output_params$write_pdf = FALSE
-  output_params$output_type = 'plot' # set to 'raster', 'png', 'plot', or 'csv'
+  output_params$write_pdf = TRUE
+  output_params$output_type = 'csv' # set to 'raster', 'png', 'plot', or 'csv'
   
   # was originally done 
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
@@ -329,7 +333,7 @@ initialise_user_output_params <- function(){
   
   # Set this to zero and it will only output the metric, if metric has been set to true. 
   # need to add flag to capture this and exit is the metric has been set to false.
-  output_params$features_to_output = 0 #1:5
+  output_params$features_to_output = c(1:5) #1:5
   
   # print the number of offsets and developments to screen
   output_params$print_dev_offset_sites = FALSE
@@ -342,12 +346,12 @@ initialise_user_output_params <- function(){
   output_params$ny = 6
   
   #set of nested lists by scenario and feature (which in this case is 5)
-  output_params$site_outcome_plot_lims_set = list(rep(list(c(0, 1e2)), 5))
-  output_params$program_outcome_plot_lims_set = list(rep(list(c(0e6, 1e5))), 5)
-  output_params$landscape_outcome_plot_lims_set = list(rep(list(c(0, 2e5))))
+  output_params$site_outcome_plot_lims_set = list(rep(list(c(0, 1e2)), 6))
+  output_params$program_outcome_plot_lims_set = list(rep(list(c(0e6, 1e7)), 6))
+  output_params$landscape_outcome_plot_lims_set = list(rep(list(c(0, 2e7)), 6))
   
   #set of nested lists by scenario and feature (which in this case is 5)
-  output_params$site_impact_plot_lims_set = list(list(c(-1e2, 1e2), c(-1e2, 1e2), c(-1e2, 1e2), c(-5e2, 5e2), c(-5e2, 5e2), c(-5e2, 5e2)))
+  output_params$site_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5))) 
   output_params$program_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5))) 
   output_params$landscape_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-1e5, 1e5), c(-1e5, 1e5), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6)))
   

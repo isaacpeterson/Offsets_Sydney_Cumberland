@@ -14,7 +14,7 @@ source(source_filename)
 author_names = c( 'mean' )
 
 management_index_set = c(1, 1, 2, 3, 2, 3)
-# author_names = 'mean_splines.rds'
+
 author_sheet_data = lapply(seq_along(author_names), 
                                    function(i) readRDS(paste0('REVISED_Elicitation_CP_Workshop_', author_names[i], '_splines.rds'))) 
 
