@@ -3,8 +3,8 @@ initialise_user_global_params <- function(folder_to_use){
   
   global_params = list()
   
-  #simulation_base_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
-  simulation_base_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
+  simulation_base_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/')
+  #simulation_base_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
   global_params$simulation_folder = paste0(simulation_base_folder, folder_to_use, '/')
   
   global_params$feature_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
@@ -38,11 +38,11 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$number_of_cores = 'all'
   
   # The number of realizations to run
-  global_params$realisation_num = 4
+  global_params$realisation_num = 1
   
   global_params$save_simulation_outputs = TRUE
   
-  global_params$save_background_cfacs = FALSE
+
   
   # Builds site_characteristics object. Note for Cumberland analysis always
   # want this to be FALSE as this is built in initialise_cumberland_data.R
@@ -75,6 +75,7 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$overwrite_management_dynamics = TRUE
   global_params$overwrite_feature_dynamics = FALSE
   global_params$build_background_cfacs = FALSE
+  global_params$save_background_cfacs = FALSE
   
   return(global_params)
 }
@@ -307,7 +308,7 @@ initialise_user_output_params <- function(){
   # folder, otherwise you specify the path
   output_params$output_folder = vector() 
   
-  output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts'
+  output_params$plot_type = 'outcomes' # can be 'outcomes'  or 'impacts'
   
   # use 'all' for all or therwise the numern eg 6 means the first 6 realiztaions.
   

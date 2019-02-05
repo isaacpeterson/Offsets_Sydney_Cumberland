@@ -126,10 +126,10 @@ source('cumberland_params.R')
 feature_params = initialise_user_feature_params()
 
 build_params = list()
-build_params$run_build_site_characteristics = FALSE
-build_params$build_probability_list = FALSE
-build_params$save_probability_list = FALSE
-
+build_params$run_build_site_characteristics = TRUE
+build_params$build_probability_list = TRUE
+build_params$save_probability_list = TRUE
+build_params$build_conservation_dynamics = FALSE
 build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_jan_16/')
 build_params$data_attribute_folder = build_params$data_folder
 build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/')
@@ -141,7 +141,6 @@ build_params$area_cuts_to_use = c(seq(0, 1e4, by = 1e3), Inf)
 
 #set the minimum allow in each cut as set by build_params$area_cuts_to_use
 build_params$min_cut_data_num = 10 
-
 
 # For the current polygon of the given PCT of a given area, check if there are
 # more than build_params$min_data_count entries to create the distriubtion to sample from
@@ -169,7 +168,6 @@ build_params$condition_class_vals = setNames(data.frame(c('Intact',
                                              c('veg_type', 'value'))
 
 
-
 # Note that raster_to_array also removes all NAs and turns them into zeros.
 
 build_params$data_filenames = setdiff(list.files(path = build_params$data_folder, pattern = ".tif", all.files = FALSE, include.dirs = FALSE, no.. = FALSE), 
@@ -185,10 +183,10 @@ build_params$priority_data_filenames = paste0(build_params$data_folder, "All_Veg
 # mapping done by BIOSIS provided as shape files.
 
 build_params$priority_data_att_filenames = c('AllVegetation_CumberlandPlain')
-build_params$cadastre_filename = "cadastre_withconstraints_rem1ha-non-veg_areas.tif"
+build_params$cadastre_filename = "cadastre_segmented_noroads.tif"
 build_params$growthareas_filename = "GrowthAreas.tif"
-cadastre_ind = which(build_params$data_filenames == build_params$cadastre_filename)
 
+cadastre_ind = which(build_params$data_filenames == build_params$cadastre_filename)
 GrowthAreas_ind = which(build_params$data_filenames == build_params$growthareas_filename)
 
 data_rasters = setNames(lapply(seq_along(build_params$data_filenames), 
@@ -250,32 +248,55 @@ if (build_params$run_build_site_characteristics == TRUE){
 
 
 
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-# 
-# block_to_use = which(names(data_arrays) == 'NPWSE_biobank.tif')
-# data_arrays_to_use = vector('list', 2)
-# data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
-# data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
-# names(data_arrays_to_use) = c('biobank', 'other_conservation')
-#  
-# probability_list_to_use = setNames(lapply(seq_along(data_arrays_to_use), 
-#                                          function(i) calc_intervention_probability(data_arrays_to_use[[i]],
-#                                                                                      site_characteristics$land_parcels, 
-#                                                                                      site_indexes_to_exclude = 1)), 
-#                                     names(data_arrays_to_use))
-#  
-# offsetsim::save_simulation_inputs(probability_list_to_use, build_params$output_data_folder)
-# feature_dynamics = readRDS(paste0(build_params$output_data_folder, 'feature_dynamics.rds'))
-# 
-# management_dynamics_high_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_high_intensity.rds'))
-# management_dynamics_low_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_low_intensity.rds'))
-#  
-# biobank_set_to_use = which(unlist(probability_list_to_use$biobank) > 0)
-# other_cons_set_to_use = which(unlist(probability_list_to_use$other_conservation) > 0)
-# 
+########## BLOCK TO BUILD MANAGED CONSERVATION AREAS
+
+block_to_use = which(names(data_arrays) == 'NPWSE_biobank.tif')
+data_arrays_to_use = vector('list', 2)
+data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
+data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
+names(data_arrays_to_use) = c('biobank', 'other_conservation')
+ 
+probability_list_to_use = setNames(lapply(seq_along(data_arrays_to_use), 
+                                         function(i) calc_intervention_probability(data_arrays_to_use[[i]],
+                                                                                     site_characteristics$land_parcels, 
+                                                                                     site_indexes_to_exclude = 1)), 
+                                    names(data_arrays_to_use))
+ 
+offsetsim::save_simulation_inputs(probability_list_to_use, build_params$output_data_folder)
+
+
+########## BLOCK TO WORK OUT FEATURE DYNAMICS OF MANAGED CONSERVATION AREAS 
+#########  this requires a rebuild of the feature dynamics for each management type with each change of the cadastre.
+if (build_params$build_conservation_dynamics == TRUE ){
+
+  build_feature_dynamics_for_specified_sites <- function(dynamics_to_update, dynamics_set_to_use, sites_to_use){
+    dynamics_to_update[sites_to_use] = dynamics_set_to_use[sites_to_use]
+    return(dynamics_to_update)
+  }
+  
+  feature_dynamics = readRDS(paste0(build_params$output_data_folder, 'feature_dynamics.rds'))
+  
+  management_dynamics = list()
+  
+  management_dynamics$low_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_low_intensity.rds'))
+  management_dynamics$high_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_high_intensity.rds'))
+  
+  sites_to_use = list()
+  sites_to_use$biobank = which(unlist(probability_list_to_use$biobank) > 0)
+  sites_to_use$other_cons = which(unlist(probability_list_to_use$other_conservation) > 0)
+  
+  management_set_to_use <- list(c(1, 1), c(1, 2), c(2, 2), c(2, 1))
+  dynamics_object <- rep(list(feature_dynamics), length(management_set_to_use))
+  
+  for (replacement_set in 1:2){
+    dynamics_object <- lapply(seq_along(dynamics_object), 
+                              function(i) build_feature_dynamics_for_specified_sites(dynamics_object[[i]], 
+                                                                                     management_dynamics[[ management_set_to_use[[i]][replacement_set] ]], 
+                                                                                     sites_to_use[[replacement_set]]))
+  }
+  
+  
+}
 # feature_dynamics_with_high_biobank_low_other = feature_dynamics
 # feature_dynamics_with_high_biobank_low_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
 # feature_dynamics_with_high_biobank_low_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
@@ -295,13 +316,8 @@ if (build_params$run_build_site_characteristics == TRUE){
 # feature_dynamics_with_low_biobank_high_other[biobank_set_to_use] = management_dynamics_high_intensity[biobank_set_to_use]
 # feature_dynamics_with_low_biobank_high_other[other_cons_set_to_use] = management_dynamics_low_intensity[other_cons_set_to_use]
 # saveRDS(feature_dynamics_with_low_biobank_high_other, paste0(build_params$output_data_folder, 'feature_dynamics_low_biobank_high_other.rds'))
-# 
 
-# 
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
-########### TEMPORARY BOCK TO BUILD MANAGED CONSERVATION AREAS
+
 
 
 if (build_params$build_probability_list == TRUE){
@@ -324,7 +340,7 @@ if (build_params$build_probability_list == TRUE){
 }
 
 
-
+stop()
 priority_data_attributes = vector('list', length(build_params$priority_data_att_filenames)) #vector of type list
 
 # Read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
