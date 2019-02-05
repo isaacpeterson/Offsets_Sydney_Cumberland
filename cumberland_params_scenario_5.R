@@ -18,14 +18,13 @@ initialise_user_simulation_params <- function(simulation_params, simulated_time_
   banked_offset_control[[1]] = banked_offset_sites_to_use
   simulation_params$banked_offset_control = list(banked_offset_control)
 
-  #development_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/dev_probability_list.rds')
-  #dev_num = length(which(unlist(development_probability_list) > 0))
-  # jan 17 cadastre data yields 4578 sites in development region
+  development_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/dev_probability_list.rds')
+  dev_num = length(which(unlist(development_probability_list) > 0))
   
   simulation_params$development_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                              intervention_start = 1, 
                                                                              intervention_end = simulated_time_steps, 
-                                                                             intervention_num = 4578, 
+                                                                             intervention_num = dev_num, 
                                                                              sd = 1))
   
   return(simulation_params)

@@ -48,33 +48,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
                                                                                                                      feature_params$initial_site_sd, 
                                                                                                                      feature_params$initial_site_mean_sd))
       
-      # running through all the polygon IDs
-      #       for (ID_ind in seq_along(current_object_ID_set)){
-      #         
-      #         current_element_set = which(current_ID_array %in% current_object_ID_set[ID_ind])
-      #         current_condition_class_mode = as.numeric(condition_class_vals$value[ match(current_condition_class_set[ID_ind], condition_class_vals$veg_type) ])
-      #         
-      #         # Call OSIM function to sample feature values given condition class and condition class bounds
-      #         
-      #         # Modify this condition_class_bounds is a nested list with info on the min, max and mean for each of the given conditions. 
-      #         # Want to alter the mean values in condition_class_bounds to be able make 
-      #         
-      #         if (modify_means == TRUE){
-      #           current_condition_class_bounds = lapply(seq_along(condition_class_bounds), 
-      #                                                   function(i) modify_mean(condition_class_bounds[[i]],
-      #                                                                           means_modifier[[ID_ind]]))
-      #         } 
-      #         
-      #         current_element_vals = offsetsim::simulate_site_feature_elements(feature_params$site_sample_type,
-      #                                                                          current_condition_class_mode,
-      #                                                                          current_condition_class_bounds,
-      #                                                                          element_num = length(current_element_set),
-      #                                                                          feature_params$initial_site_sd, 
-      #                                                                          feature_params$initial_site_mean_sd)
-      #         
-      #         current_feature[current_element_set] = current_element_vals
-      #         
-      #       }
+
     }
     
     current_feature[unlist(grouped_element_IDs)] = unlist(element_vals)
@@ -126,7 +100,7 @@ source('cumberland_params.R')
 feature_params = initialise_user_feature_params()
 
 build_params = list()
-build_params$run_build_site_characteristics = TRUE
+build_params$run_build_site_characteristics = FALSE
 build_params$build_probability_list = TRUE
 build_params$save_probability_list = TRUE
 build_params$build_conservation_dynamics = FALSE
@@ -139,6 +113,10 @@ build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_
 # This is based on the freq distribution of the shape_area values for each PGA
 build_params$area_cuts_to_use = c(seq(0, 1e4, by = 1e3), Inf)
 
+build_params$intervention_region_filenames = matrix( ncol=2, byrow=TRUE, 
+                                                     c('GrowthAreas_DevFootprint.tif', 'dev_probability_list',
+                                                       'SelectedAReas_Draft_v1.tif', 'offset_probability_list',
+                                                       'Phase0Constraints.tif', 'offset_probability_list_phase0'))
 #set the minimum allow in each cut as set by build_params$area_cuts_to_use
 build_params$min_cut_data_num = 10 
 
@@ -184,7 +162,7 @@ build_params$priority_data_filenames = paste0(build_params$data_folder, "All_Veg
 
 build_params$priority_data_att_filenames = c('AllVegetation_CumberlandPlain')
 build_params$cadastre_filename = "cadastre_segmented_noroads.tif"
-build_params$growthareas_filename = "GrowthAreas.tif"
+build_params$growthareas_filename = "GrowthAreas_DevFootprint_updated.tif"
 
 cadastre_ind = which(build_params$data_filenames == build_params$cadastre_filename)
 GrowthAreas_ind = which(build_params$data_filenames == build_params$growthareas_filename)
@@ -239,36 +217,26 @@ if (build_params$run_build_site_characteristics == TRUE){
 }
 
 
-# Note: all Site IDs are integers. The code above, finds all unique integes
-# and gives then an ID starting from 1. However NAs have all gone to zero
-# above and hence, all zero parcels will have a site index of "1". We want to
-# remove them from the analysis as these aren't used. This is why
-# site_indexes_to_exclude is set to "1" below.
-
-
-
-
-########## BLOCK TO BUILD MANAGED CONSERVATION AREAS
-
-block_to_use = which(names(data_arrays) == 'NPWSE_biobank.tif')
-data_arrays_to_use = vector('list', 2)
-data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
-data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
-names(data_arrays_to_use) = c('biobank', 'other_conservation')
- 
-probability_list_to_use = setNames(lapply(seq_along(data_arrays_to_use), 
-                                         function(i) calc_intervention_probability(data_arrays_to_use[[i]],
-                                                                                     site_characteristics$land_parcels, 
-                                                                                     site_indexes_to_exclude = 1)), 
-                                    names(data_arrays_to_use))
- 
-offsetsim::save_simulation_inputs(probability_list_to_use, build_params$output_data_folder)
-
 
 ########## BLOCK TO WORK OUT FEATURE DYNAMICS OF MANAGED CONSERVATION AREAS 
 #########  this requires a rebuild of the feature dynamics for each management type with each change of the cadastre.
 if (build_params$build_conservation_dynamics == TRUE ){
-
+  
+  ########## BLOCK TO BUILD MANAGED CONSERVATION AREAS
+  block_to_use = which(names(data_arrays) == 'NPWSE_biobank.tif')
+  data_arrays_to_use = vector('list', 2)
+  data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
+  data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
+  names(data_arrays_to_use) = c('biobank', 'other_conservation')
+  
+  conservation_region_site_list = setNames(lapply(seq_along(data_arrays_to_use), 
+                                                  function(i) calc_intervention_probability(data_arrays_to_use[[i]],
+                                                                                            site_characteristics$land_parcels, 
+                                                                                            site_indexes_to_exclude = 1)), 
+                                           names(data_arrays_to_use))
+  
+  offsetsim::save_simulation_inputs(conservation_region_site_list, build_params$output_data_folder)
+  
   build_feature_dynamics_for_specified_sites <- function(dynamics_to_update, dynamics_set_to_use, sites_to_use){
     dynamics_to_update[sites_to_use] = dynamics_set_to_use[sites_to_use]
     return(dynamics_to_update)
@@ -282,8 +250,8 @@ if (build_params$build_conservation_dynamics == TRUE ){
   management_dynamics$high_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_high_intensity.rds'))
   
   sites_to_use = list()
-  sites_to_use$biobank = which(unlist(probability_list_to_use$biobank) > 0)
-  sites_to_use$other_cons = which(unlist(probability_list_to_use$other_conservation) > 0)
+  sites_to_use$biobank = which(unlist(conservation_region_site_list$biobank) > 0)
+  sites_to_use$other_cons = which(unlist(conservation_region_site_list$other_conservation) > 0)
   
   management_set_to_use <- list(c(1, 1), c(1, 2), c(2, 2), c(2, 1))
   dynamics_object <- rep(list(feature_dynamics), length(management_set_to_use))
@@ -294,7 +262,6 @@ if (build_params$build_conservation_dynamics == TRUE ){
                                                                                      management_dynamics[[ management_set_to_use[[i]][replacement_set] ]], 
                                                                                      sites_to_use[[replacement_set]]))
   }
-  
   
 }
 # feature_dynamics_with_high_biobank_low_other = feature_dynamics
@@ -322,16 +289,11 @@ if (build_params$build_conservation_dynamics == TRUE ){
 
 if (build_params$build_probability_list == TRUE){
   
-  layer_names_to_use = matrix( ncol=2, byrow=TRUE, 
-                               c('GrowthAreas_DevFootprint.tif', 'dev_probability_list',
-                                 'SelectedAReas_Draft_v1.tif', 'offset_probability_list',
-                                 'Phase0Constraints.tif', 'offset_probability_list_phase0'))
-  
-  probability_list = setNames(lapply(seq(dim(layer_names_to_use)[1]), 
-                                     function(i) calc_intervention_probability(data_arrays[[which(names(data_arrays) == layer_names_to_use[i, 1])]],
+  probability_list = setNames(lapply(seq(dim(build_params$intervention_region_filenames)[1]), 
+                                     function(i) calc_intervention_probability(data_arrays[[which(names(data_arrays) == build_params$intervention_region_filenames[i, 1])]],
                                                                                site_characteristics$land_parcels, 
                                                                                site_indexes_to_exclude = 1)), 
-                              layer_names_to_use[, 2])
+                              build_params$intervention_region_filenames[, 2])
   
   # Save the objects the output folder, save to file with the same name as the sublists (eg dev_probability_list)
   if (build_params$save_probability_list == TRUE){
