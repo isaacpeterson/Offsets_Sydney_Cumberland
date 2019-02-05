@@ -1,6 +1,6 @@
 library(offsetsim)
 
-scenario_num = 6
+scenario_num = 4
 
 source('global_scenario_params_set.R')
 user_output_params <- initialise_user_output_params()
@@ -13,7 +13,7 @@ source(source_filename)
 #author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
 author_names = c( 'mean' )
 
-management_index_set = c(1, 1, 2, 3, 2, 3)
+management_index_set = c(1, 1, 2, 2, 3, 3)
 
 author_sheet_data = lapply(seq_along(author_names), 
                                    function(i) readRDS(paste0('REVISED_Elicitation_CP_Workshop_', author_names[i], '_splines.rds'))) 
