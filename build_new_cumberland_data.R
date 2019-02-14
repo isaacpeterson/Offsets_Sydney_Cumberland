@@ -100,23 +100,21 @@ source('cumberland_params.R')
 feature_params = initialise_user_feature_params()
 
 build_params = list()
-build_params$run_build_site_characteristics = FALSE
+build_params$run_build_site_characteristics = TRUE
 build_params$build_probability_list = TRUE
 build_params$save_probability_list = TRUE
 build_params$build_conservation_dynamics = FALSE
-build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_jan_16/')
+build_params$build_features = FALSE
+build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_feb_13/')
 build_params$data_attribute_folder = build_params$data_folder
 build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/')
-build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data/')
+build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_feb_13/')
 # This is how the parcel size sampling is done Specify area size classes for
 # sampling condition. If want to use different size classes, change this vector.
 # This is based on the freq distribution of the shape_area values for each PGA
 build_params$area_cuts_to_use = c(seq(0, 1e4, by = 1e3), Inf)
 
-build_params$intervention_region_filenames = matrix( ncol=2, byrow=TRUE, 
-                                                     c('GrowthAreas_DevFootprint.tif', 'dev_probability_list',
-                                                       'SelectedAReas_Draft_v1.tif', 'offset_probability_list',
-                                                       'Phase0Constraints.tif', 'offset_probability_list_phase0'))
+
 #set the minimum allow in each cut as set by build_params$area_cuts_to_use
 build_params$min_cut_data_num = 10 
 
@@ -161,28 +159,40 @@ build_params$priority_data_filenames = paste0(build_params$data_folder, "All_Veg
 # mapping done by BIOSIS provided as shape files.
 
 build_params$priority_data_att_filenames = c('AllVegetation_CumberlandPlain')
-build_params$cadastre_filename = "cadastre_segmented_noroads.tif"
-build_params$growthareas_filename = "GrowthAreas_DevFootprint_updated.tif"
+build_params$cadastre_filename = "cadastre_removed_id160769.tif"
+build_params$growth_areas_filename = "GrowthAreas_DevFootprint_updated.tif"
+build_params$offset_areas_filename = 'SelectedArea_Draftv1_updated.tif'
+build_params$offset_phase0_filename = 'Phase0-constraints.tif'
+
+build_params$intervention_region_filenames = matrix( ncol=2, byrow=TRUE, 
+                                                     c(build_params$growth_areas_filename, 'dev_probability_list',
+                                                       build_params$offset_areas_filename, 'offset_probability_list',
+                                                       build_params$offset_phase0_filename, 'offset_probability_list_phase0'))
 
 cadastre_ind = which(build_params$data_filenames == build_params$cadastre_filename)
-GrowthAreas_ind = which(build_params$data_filenames == build_params$growthareas_filename)
+GrowthAreas_ind = which(build_params$data_filenames == build_params$growth_areas_filename)
 
 data_rasters = setNames(lapply(seq_along(build_params$data_filenames), 
                                function(i) offsetsim::load_rasters(paste0(build_params$data_folder, build_params$data_filenames[i]), features_to_use = 'all')), build_params$data_filenames)
 
 data_arrays = setNames(lapply(seq_along(build_params$data_filenames), function(i) offsetsim::raster_to_array(data_rasters[[i]])), build_params$data_filenames)
 
-feature_ID_rasters = offsetsim::load_rasters(build_params$priority_data_filenames, features_to_use = 'all')
 
 # Convert the feature_ID_rasters stack to a list of arrays, turning NAs to zeros.
 # The values in the array represent the IDs for each polygon of Veg
-feature_ID_layers = lapply(seq(dim(feature_ID_rasters)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_rasters, i)))
 
-cumberland_layer = feature_ID_layers[[1]]*(1 - data_arrays$GrowthAreas_DevFootprint.tif)
-cumberland_layer_IDs = unique(as.vector(cumberland_layer))
+if (build_params$build_features == TRUE){
+  feature_ID_rasters = offsetsim::load_rasters(build_params$priority_data_filenames, features_to_use = 'all')
+  feature_ID_layers = lapply(seq(dim(feature_ID_rasters)[3]), function(i) offsetsim::raster_to_array(subset(feature_ID_rasters, i)))
+  
+  cumberland_layer = feature_ID_layers[[1]]*(1 - data_arrays$GrowthAreas_DevFootprint.tif)
+  cumberland_layer_IDs = unique(as.vector(cumberland_layer))
+  
+  ####### REMOVE IF NECESSARY - used to simulate two disjoint layers
+  feature_ID_layers = append(feature_ID_layers, list(cumberland_layer))
+  
+}
 
-####### REMOVE IF NECESSARY - used to simulate two disjoint layers
-feature_ID_layers = append(feature_ID_layers, list(cumberland_layer))
 
 # Build the site characteristics object. Contains the info the simulation to
 # assign pixel values to appropriate parcel and vegetation polygons. This
@@ -246,22 +256,34 @@ if (build_params$build_conservation_dynamics == TRUE ){
   
   management_dynamics = list()
   
-  management_dynamics$low_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_low_intensity.rds'))
-  management_dynamics$high_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_high_intensity.rds'))
+  management_dynamics$low_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_low.rds'))
+  management_dynamics$high_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_high.rds'))
   
   sites_to_use = list()
   sites_to_use$biobank = which(unlist(conservation_region_site_list$biobank) > 0)
   sites_to_use$other_cons = which(unlist(conservation_region_site_list$other_conservation) > 0)
   
-  management_set_to_use <- list(c(1, 1), c(1, 2), c(2, 2), c(2, 1))
-  dynamics_object <- rep(list(feature_dynamics), length(management_set_to_use))
+  management_order = c('low', 'high')
+  management_set_to_use <- matrix( ncol=2, byrow=TRUE, 
+                                   c(1, 1,
+                                     1, 2,
+                                     2, 2,
+                                     2, 1))
+
+  dynamics_object <- rep(list(feature_dynamics), dim(management_set_to_use)[1])
   
-  for (replacement_set in 1:2){
-    dynamics_object <- lapply(seq_along(dynamics_object), 
-                              function(i) build_feature_dynamics_for_specified_sites(dynamics_object[[i]], 
-                                                                                     management_dynamics[[ management_set_to_use[[i]][replacement_set] ]], 
-                                                                                     sites_to_use[[replacement_set]]))
+  for (management_region in 1:2){
+    dynamics_object <- setNames(lapply(seq_along(dynamics_object), 
+                                       function(i)  build_feature_dynamics_for_specified_sites(dynamics_object[[i]], 
+                                                                                              management_dynamics[[ management_set_to_use[i, management_region] ]], 
+                                                                                              sites_to_use[[management_region]])),
+                                paste0(names(dynamics_object), management_order[management_set_to_use[, management_region]], '_',
+                                       names(conservation_region_site_list[management_region]), '_'))
+   
   }
+  
+  names(dynamics_object) <- paste0(names(dynamics_object), 'feature_dynamics')
+  offsetsim::save_simulation_inputs(dynamics_object, build_params$output_data_folder)
   
 }
 # feature_dynamics_with_high_biobank_low_other = feature_dynamics
@@ -288,7 +310,7 @@ if (build_params$build_conservation_dynamics == TRUE ){
 
 
 if (build_params$build_probability_list == TRUE){
-  
+  browser()
   probability_list = setNames(lapply(seq(dim(build_params$intervention_region_filenames)[1]), 
                                      function(i) calc_intervention_probability(data_arrays[[which(names(data_arrays) == build_params$intervention_region_filenames[i, 1])]],
                                                                                site_characteristics$land_parcels, 
@@ -302,7 +324,6 @@ if (build_params$build_probability_list == TRUE){
 }
 
 
-stop()
 priority_data_attributes = vector('list', length(build_params$priority_data_att_filenames)) #vector of type list
 
 # Read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
