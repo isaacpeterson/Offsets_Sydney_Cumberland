@@ -74,8 +74,6 @@ initialise_user_global_params <- function(folder_to_use){
   
   global_params$overwrite_management_dynamics = TRUE
   global_params$overwrite_feature_dynamics = FALSE
-  global_params$build_background_cfacs = FALSE
-  global_params$save_background_cfacs = FALSE
   
   return(global_params)
 }
@@ -326,7 +324,7 @@ initialise_user_output_params <- function(){
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
   
   output_params$write_pdf = TRUE
-  output_params$output_type = 'csv' # set to 'raster', 'png', 'plot', or 'csv'
+  output_params$output_type = 'png' # set to 'raster', 'png', 'plot', or 'csv'
   
   # was originally done 
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
@@ -334,13 +332,13 @@ initialise_user_output_params <- function(){
   
   # Set this to zero and it will only output the metric, if metric has been set to true. 
   # need to add flag to capture this and exit is the metric has been set to false.
-  output_params$features_to_output = c(1:5) #1:5
+  output_params$features_to_output = 0 #1:5
   
   # print the number of offsets and developments to screen
   output_params$print_dev_offset_sites = FALSE
   
   #ouput offset sites as block colors rather than site_vals
-  output_params$output_block_offsets = FALSE
+  output_params$output_block_offsets = TRUE
   
   # number of plot sub windows
   output_params$nx = 3 
