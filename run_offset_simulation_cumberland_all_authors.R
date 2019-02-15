@@ -10,9 +10,21 @@ user_feature_params_global <- initialise_user_feature_params_global()
 source_filename <- paste0('cumberland_params_scenario_', scenario_num, '.R')
 source(source_filename)
 
+
+# Note: if changing to other authors you need to make sure to set 
+# global_params$overwrite_feature_dynamics = TRUE in global_scenario_params_set.R
+
+# Also note that when changing authors, if you are include background
+# different background dynamics of conservation areas (eg biobank high
+# management, conservation areas low management), then Isaac neeads to
+# manually generate the feature_dynamics.rds file for each case. So without
+# this being done, you can only run with no management of conservation areas
+# and biobank sites.
+
 #author_names = c('dkirk', 'dkeith', 'gsteenbeeke', 'pprice', 'cmorris')
 author_names = c( 'mean' )
 
+# This determins whether managemetn: 1=no management, 2=low intensity management, 3=high intensity management
 management_index_set = c(1, 1, 2, 2, 3, 3)
 
 author_sheet_data = lapply(seq_along(author_names), 
