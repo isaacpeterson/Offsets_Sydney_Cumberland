@@ -1,4 +1,5 @@
-# developments and offsets secured at yr 1 with low intensity
+# offsets secured at yr 1 with low intensity
+
 initialise_user_simulation_params <- function(simulation_params, simulated_time_steps){ 
   
   simulation_params$use_offset_bank = TRUE
@@ -13,6 +14,7 @@ initialise_user_simulation_params <- function(simulation_params, simulated_time_
   offset_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/offset_probability_list.rds')
   site_characteristics = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/site_characteristics.rds')
   banked_offset_sites_to_use = site_characteristics$site_IDs[which(unlist(offset_probability_list) > 0)]
+
   
   # [[1]] indicates all offsets to take place on year 1
   banked_offset_control[[1]] = banked_offset_sites_to_use

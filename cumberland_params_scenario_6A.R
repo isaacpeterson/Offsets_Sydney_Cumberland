@@ -1,5 +1,5 @@
 # Offsets implemented incrementally over simulation in strategic area, high
-# intensity management
+# intensity management, only implement half the offsets in strategic areea
 
 initialise_user_simulation_params <- function(simulation_params, simulated_time_steps){ 
   
@@ -12,10 +12,14 @@ initialise_user_simulation_params <- function(simulation_params, simulated_time_
   site_characteristics = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/site_characteristics.rds')
   banked_offset_sites_to_use = site_characteristics$site_IDs[which(unlist(offset_probability_list) > 0)]
   
+  # only implement half the offsets
+  number_of_offsets = round(0.5*length(banked_offset_sites_to_use))
+  
+
   simulation_params$banked_offset_control = list(build_stochastic_intervention(simulated_time_steps, 
                                                                                intervention_start = 1, 
                                                                                intervention_end = simulated_time_steps, 
-                                                                               intervention_num = length(banked_offset_sites_to_use), 
+                                                                               intervention_num = number_of_offsets, 
                                                                                sd = 1))
   
   # How the development parcels are selected options are 'stochastic',
