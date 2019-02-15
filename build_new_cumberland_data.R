@@ -100,10 +100,10 @@ source('cumberland_params.R')
 feature_params = initialise_user_feature_params()
 
 build_params = list()
-build_params$run_build_site_characteristics = TRUE
-build_params$build_probability_list = TRUE
-build_params$save_probability_list = TRUE
-build_params$build_conservation_dynamics = FALSE
+build_params$run_build_site_characteristics = FALSE
+build_params$build_probability_list = FALSE
+build_params$save_probability_list = FALSE
+build_params$build_conservation_dynamics = TRUE
 build_params$build_features = FALSE
 build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_feb_13/')
 build_params$data_attribute_folder = build_params$data_folder
@@ -163,7 +163,7 @@ build_params$cadastre_filename = "cadastre_removed_id160769.tif"
 build_params$growth_areas_filename = "GrowthAreas_DevFootprint_updated.tif"
 build_params$offset_areas_filename = 'SelectedArea_Draftv1_updated.tif'
 build_params$offset_phase0_filename = 'Phase0-constraints.tif'
-
+build_params$biobank_layer_filename = 'NPW_Biobank_updated.tif'
 build_params$intervention_region_filenames = matrix( ncol=2, byrow=TRUE, 
                                                      c(build_params$growth_areas_filename, 'dev_probability_list',
                                                        build_params$offset_areas_filename, 'offset_probability_list',
@@ -231,9 +231,9 @@ if (build_params$run_build_site_characteristics == TRUE){
 ########## BLOCK TO WORK OUT FEATURE DYNAMICS OF MANAGED CONSERVATION AREAS 
 #########  this requires a rebuild of the feature dynamics for each management type with each change of the cadastre.
 if (build_params$build_conservation_dynamics == TRUE ){
-  
+  browser()
   ########## BLOCK TO BUILD MANAGED CONSERVATION AREAS
-  block_to_use = which(names(data_arrays) == 'NPWSE_biobank.tif')
+  block_to_use = which(names(data_arrays) == build_params$biobank_layer_filename )
   data_arrays_to_use = vector('list', 2)
   data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
   data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
@@ -252,12 +252,12 @@ if (build_params$build_conservation_dynamics == TRUE ){
     return(dynamics_to_update)
   }
   
-  feature_dynamics = readRDS(paste0(build_params$output_data_folder, 'feature_dynamics.rds'))
+  feature_dynamics = readRDS(paste0(build_params$simulation_inputs_folder, 'feature_dynamics.rds'))
   
   management_dynamics = list()
   
-  management_dynamics$low_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_low.rds'))
-  management_dynamics$high_intensity = readRDS(paste0(build_params$output_data_folder, 'management_dynamics_high.rds'))
+  management_dynamics$low_intensity = readRDS(paste0(build_params$simulation_inputs_folder, 'management_dynamics_low.rds'))
+  management_dynamics$high_intensity = readRDS(paste0(build_params$simulation_inputs_folder, 'management_dynamics_high.rds'))
   
   sites_to_use = list()
   sites_to_use$biobank = which(unlist(conservation_region_site_list$biobank) > 0)
