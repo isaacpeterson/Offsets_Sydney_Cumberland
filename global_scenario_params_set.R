@@ -167,7 +167,7 @@ initialise_user_simulation_params_global <- function(){
   
   
   #ignore offset sites with zero value
-  simulation_params$screen_offset_zeros = TRUE
+  simulation_params$screen_offset_zeros = FALSE
   
   # ignore development sites with zero value
   simulation_params$screen_dev_zeros = FALSE
