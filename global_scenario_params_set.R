@@ -73,7 +73,7 @@ initialise_user_global_params <- function(folder_to_use){
   # just take a bit longer to get started.
   
   global_params$overwrite_management_dynamics = TRUE
-  global_params$overwrite_feature_dynamics = FALSE
+  global_params$overwrite_feature_dynamics = TRUE
   
   return(global_params)
 }
@@ -164,7 +164,6 @@ initialise_user_simulation_params_global <- function(){
   # set to false to stop initial credit being transformed - this has a big impact when using the BAM metric which 
   # transforms large values to ceiling defined by 100.68
   simulation_params$transform_initial_credit = FALSE
-  
   
   #ignore offset sites with zero value
   simulation_params$screen_offset_zeros = TRUE
