@@ -11,7 +11,7 @@ library(offsetsim)
 # current_ID_array array of polygon IDs.
 
 build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, current_data_attributes, 
-                                condition_class_vals, feature_params, condition_class_bounds, modify_means, means_modifier){
+                                condition_class_vals, feature_params, condition_class_bounds, sample_from_characterised, means_modifier){
   
   current_feature = matrix(0, dim(current_ID_array)[1], dim(current_ID_array)[2])
   
@@ -29,7 +29,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
   
     } else if (feature_type == 'Feature_Value'){
       
-      if (modify_means == TRUE){
+      if (sample_from_characterised == TRUE){
         condition_class_bounds_set <- lapply(seq_along(current_object_ID_set), function(i) lapply(seq_along(condition_class_bounds), 
                                                                                                   function(j) modify_mean(condition_class_bounds[[j]],
                                                                                                                           means_modifier[[i]])))
@@ -54,6 +54,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
     current_feature[unlist(grouped_element_IDs)] = unlist(element_vals)
     
   }
+  
   return(current_feature)
 }
 
@@ -106,11 +107,12 @@ build_params$save_probability_list = FALSE
 build_params$build_conservation_dynamics = FALSE
 
 build_params$build_features = TRUE
-build_params$sample_from_characterised = TRUE
+build_params$sample_from_characterised = FALSE
+
 build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_feb_13/')
 build_params$data_attribute_folder = build_params$data_folder
 build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/')
-build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_feb_13/')
+build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_non_characterised/')
 # This is how the parcel size sampling is done Specify area size classes for
 # sampling condition. If want to use different size classes, change this vector.
 # This is based on the freq distribution of the shape_area values for each PGA
@@ -309,33 +311,35 @@ if (build_params$build_probability_list == TRUE){
 }
 
 
-priority_data_attributes = vector('list', length(build_params$priority_data_att_filenames)) #vector of type list
+data_attributes = vector('list', length(build_params$priority_data_att_filenames)) #vector of type list
 
 # Read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
 for (data_ind in seq_along(build_params$priority_data_att_filenames)){
   current_veg = build_params$priority_data_att_filenames[data_ind]
-  priority_data_attributes[[data_ind]] = read.xls(paste0(build_params$data_attribute_folder, build_params$priority_data_att_filenames[data_ind], '.xls'))
+  data_attributes[[data_ind]] = read.xls(paste0(build_params$data_attribute_folder, build_params$priority_data_att_filenames[data_ind], '.xls'))
 }
 
 
 # build artificial attribute table for region outside priority region - set all polygons outside priority region to cumberland_layer 
-cumberland_ID_indexes = which(as.vector(priority_data_attributes[[1]]$object_ID) %in% cumberland_layer_IDs)
-priority_IDs = setdiff(1:dim(priority_data_attributes[[1]])[1], cumberland_ID_indexes)
+cumberland_ID_indexes = which(as.vector(data_attributes[[1]]$object_ID) %in% cumberland_layer_IDs)
+priority_IDs = setdiff(1:dim(data_attributes[[1]])[1], cumberland_ID_indexes)
 
-cumberland_att = priority_data_attributes[[1]][cumberland_ID_indexes, ]
-priority_data_attributes[[1]] = priority_data_attributes[[1]][priority_IDs, ]
+cumberland_att = data_attributes[[1]][cumberland_ID_indexes, ]
+data_attributes[[1]] = data_attributes[[1]][priority_IDs, ]
 
 
 
-if (build_params$sample_from_characterised == TRUE){
+if (build_params$sample_from_characterised == FALSE){
+  
+} else {
   #------------------------------
   # Initialize the veg condition 
   #------------------------------
   
-  # This selects a subset priority_data_attributes that only contain the 'PCT', 'condition', 'shape_area'.
+  # This selects a subset data_attributes that only contain the 'PCT', 'condition', 'shape_area'.
   
-  priority_condition_att = lapply(seq_along(priority_data_attributes), 
-                                  function(i) priority_data_attributes[[i]][match(c('PCT', 'condition', 'shape_area'), names(priority_data_attributes[[i]]))])
+  priority_condition_att = lapply(seq_along(data_attributes), 
+                                  function(i) data_attributes[[i]][match(c('PCT', 'condition', 'shape_area'), names(data_attributes[[i]]))])
   
   # makes one matrix of the data attributes. All priority areas are combined into one single matrix.
   priority_condition_set = do.call("rbind", priority_condition_att)
@@ -435,7 +439,7 @@ if (build_params$sample_from_characterised == TRUE){
   cumberland_att$condition = cumberland_conditions
   
   # Binds the cumberland_att with new condition info to the PGA Biosis data
-  data_attributes = append(priority_data_attributes, list(cumberland_att))
+  data_attributes = append(data_attributes, list(cumberland_att))
   
   # sets the list names to match the veg layers
   names(data_attributes) = c(build_params$priority_data_att_filenames, 'cumberland_att')
@@ -470,7 +474,7 @@ for (data_ind in seq_along(data_attributes)){
                                                                      build_params$condition_class_vals, 
                                                                      feature_params, 
                                                                      condition_class_bounds = vector(), 
-                                                                     modify_means = FALSE, 
+                                                                     sample_from_characterised = FALSE, 
                                                                      means_modifier = vector())
     
   }
@@ -552,7 +556,7 @@ for (data_ind in seq_along(data_attributes)){
                                                                                      feature_params, 
                                                                                      # Note these are where the condition class bounds come from 
                                                                                      condition_class_bounds = feature_params$initial_condition_class_bounds[[feature_ind]], 
-                                                                                     modify_means = TRUE, 
+                                                                                     sample_from_characterised = build_params$sample_from_characterised, 
                                                                                      means_modifier)
       
     }
