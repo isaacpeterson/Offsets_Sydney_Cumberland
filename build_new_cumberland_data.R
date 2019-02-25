@@ -111,7 +111,7 @@ build_params$sample_from_characterised = FALSE
 
 build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_feb_13/')
 build_params$data_attribute_folder = build_params$data_folder
-build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/')
+build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_non_characterised/')
 build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_non_characterised/')
 # This is how the parcel size sampling is done Specify area size classes for
 # sampling condition. If want to use different size classes, change this vector.
@@ -242,7 +242,7 @@ if (build_params$build_conservation_dynamics == TRUE ){
   data_arrays_to_use = vector('list', 2)
   data_arrays_to_use[[1]] = 1*(data_arrays[[block_to_use]] == 1)
   data_arrays_to_use[[2]] = 1*(data_arrays[[block_to_use]] == 2)
-  names(data_arrays_to_use) = c('biobank', 'other_conservation')
+  names(data_arrays_to_use) = c('biobank_probability_list', 'other_conservation_probability_list')
   
   conservation_region_site_list = setNames(lapply(seq_along(data_arrays_to_use), 
                                                   function(i) calc_intervention_probability(data_arrays_to_use[[i]],
@@ -295,7 +295,6 @@ if (build_params$build_conservation_dynamics == TRUE ){
 
 
 
-
 if (build_params$build_probability_list == TRUE){
 
   probability_list = setNames(lapply(seq(dim(build_params$intervention_region_filenames)[1]), 
@@ -310,7 +309,6 @@ if (build_params$build_probability_list == TRUE){
   }
 }
 
-
 data_attributes = vector('list', length(build_params$priority_data_att_filenames)) #vector of type list
 
 # Read in data attributes associated with BIOSIS files from Veg mapping that were generated from ARCGIS
@@ -320,18 +318,14 @@ for (data_ind in seq_along(build_params$priority_data_att_filenames)){
 }
 
 
+if (build_params$sample_from_characterised == TRUE){
 # build artificial attribute table for region outside priority region - set all polygons outside priority region to cumberland_layer 
-cumberland_ID_indexes = which(as.vector(data_attributes[[1]]$object_ID) %in% cumberland_layer_IDs)
-priority_IDs = setdiff(1:dim(data_attributes[[1]])[1], cumberland_ID_indexes)
+  cumberland_ID_indexes = which(as.vector(data_attributes[[1]]$object_ID) %in% cumberland_layer_IDs)
+  priority_IDs = setdiff(1:dim(data_attributes[[1]])[1], cumberland_ID_indexes)
 
-cumberland_att = data_attributes[[1]][cumberland_ID_indexes, ]
-data_attributes[[1]] = data_attributes[[1]][priority_IDs, ]
+  cumberland_att = data_attributes[[1]][cumberland_ID_indexes, ]
+  data_attributes[[1]] = data_attributes[[1]][priority_IDs, ]
 
-
-
-if (build_params$sample_from_characterised == FALSE){
-  
-} else {
   #------------------------------
   # Initialize the veg condition 
   #------------------------------
