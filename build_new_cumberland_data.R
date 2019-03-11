@@ -21,6 +21,7 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
     current_object_ID_set = current_data_attributes$object_ID[PCT_set_to_use]
     
     if (feature_type == 'condition_class'){
+      
       condition_class_blocks = lapply(seq_along(condition_class_vals$veg_type), function(i) which(current_condition_class_set == as.character(condition_class_vals$veg_type[i])))
       condition_class_IDs = lapply(seq_along(condition_class_blocks), function(i) current_object_ID_set[condition_class_blocks[[i]]])
       
@@ -47,8 +48,6 @@ build_feature_layer <- function(feature_type, PCT_set_to_use, current_ID_array, 
                                                                                                                      element_num = length(grouped_element_IDs[[i]]),
                                                                                                                      feature_params$initial_site_sd, 
                                                                                                                      feature_params$initial_site_mean_sd))
-      
-
     }
     
     current_feature[unlist(grouped_element_IDs)] = unlist(element_vals)
@@ -102,17 +101,16 @@ feature_params = initialise_user_feature_params()
 
 build_params = list()
 build_params$run_build_site_characteristics = FALSE
-build_params$build_probability_list = FALSE
-build_params$save_probability_list = FALSE
+build_params$build_probability_list = TRUE
 build_params$build_conservation_dynamics = FALSE
 
-build_params$build_features = TRUE
+build_params$build_features = FALSE
 build_params$sample_from_characterised = FALSE
 
 build_params$data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/updated_rasters_feb_13/')
 build_params$data_attribute_folder = build_params$data_folder
-build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_non_characterised/')
-build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_non_characterised/')
+build_params$simulation_inputs_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_non_sampled/')
+build_params$output_data_folder = paste0(path.expand('~'), '/offset_data/Sydney_Cumberland_Data/prepared_data_non_sampled/')
 # This is how the parcel size sampling is done Specify area size classes for
 # sampling condition. If want to use different size classes, change this vector.
 # This is based on the freq distribution of the shape_area values for each PGA
@@ -302,11 +300,8 @@ if (build_params$build_probability_list == TRUE){
                                                                                site_characteristics$land_parcels, 
                                                                                site_indexes_to_exclude = 1)), 
                               build_params$intervention_region_filenames[, 2])
-  
-  # Save the objects the output folder, save to file with the same name as the sublists (eg dev_probability_list)
-  if (build_params$save_probability_list == TRUE){
-    offsetsim::save_simulation_inputs(probability_list, build_params$output_data_folder)
-  }
+
+  offsetsim::save_simulation_inputs(probability_list, build_params$output_data_folder)
 }
 
 data_attributes = vector('list', length(build_params$priority_data_att_filenames)) #vector of type list
@@ -481,8 +476,6 @@ for (data_ind in seq_along(data_attributes)){
 paste0('condition classes built at ',
        round(difftime(Sys.time(), sim_time), 1), 
        units(difftime(Sys.time(), sim_time)))
-
-
 
 
 

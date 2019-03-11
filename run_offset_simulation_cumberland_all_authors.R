@@ -1,6 +1,6 @@
 library(offsetsim)
 
-scenario_num = 1
+scenario_num = 6
 
 source('global_scenario_params_set.R')
 user_output_params <- initialise_user_output_params()
@@ -18,6 +18,11 @@ management_index_set = c(1, 1, 2, 2, 3, 3)
 author_sheet_data = lapply(seq_along(author_names), 
                                    function(i) readRDS(paste0('REVISED_Elicitation_CP_Workshop_', author_names[i], '_splines.rds'))) 
 
+#these are the actual site ids specified in the raster layer
+offset_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/prepared_data_sampled_feb_23/offset_probability_list.rds')
+development_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/prepared_data_sampled_feb_23/dev_probability_list.rds')
+site_characteristics = readRDS('~/offset_data/Sydney_Cumberland_Data/prepared_data_sampled_feb_23/site_characteristics.rds')
+
 for (i in seq_along(author_names)){
 
   user_feature_params = initialise_feature_dynamics_set(user_feature_params_global, 
@@ -25,7 +30,8 @@ for (i in seq_along(author_names)){
                                                         management_index_to_use = management_index_set[scenario_num])
   
   user_global_params = initialise_user_global_params(folder_to_use = paste0(author_names[i], '/scenario_', scenario_num))
-  user_simulation_params = initialise_user_simulation_params(user_simulation_params_global, user_global_params$time_steps)
+  user_simulation_params = initialise_user_simulation_params(user_simulation_params_global, user_global_params$time_steps, 
+                                                             offset_probability_list, development_probability_list, site_characteristics)
   
   osim.run(user_global_params, user_simulation_params, user_feature_params, user_transform_function, loglevel = 'TRACE')
   simulation_folder = find_current_run_folder(user_global_params$simulation_folder)
