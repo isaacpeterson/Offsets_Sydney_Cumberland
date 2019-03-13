@@ -7,21 +7,19 @@ initialise_user_global_params <- function(folder_to_use){
   #simulation_base_folder = '/mnt/offset_data/Sydney_Cumberland_Data/'
   global_params$simulation_folder = paste0(simulation_base_folder, folder_to_use, '/')
   
-  global_params$feature_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
-                                              (list.files(path = paste0(simulation_base_folder, 'simulation_inputs_jan_17/'),
+  global_params$feature_raster_files = paste0(simulation_base_folder, 'prepared_data_sampled_feb_23/', 
+                                              list.files(path = paste0(simulation_base_folder, 'prepared_data_sampled_feb_23/'),
                                                           pattern = 'PCT_849_feature_', all.files = FALSE, 
                                                           full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
-                                                          include.dirs = FALSE, no.. = FALSE)))
+                                                          include.dirs = FALSE, no.. = FALSE))
   
-  global_params$planning_units_raster = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 'cadastre_withconstraints_rem1ha-non-veg_areas.tif')
-  
-  global_params$condition_class_raster_files = paste0(simulation_base_folder, 'simulation_inputs_jan_17/', 
-                                                      (list.files(path = paste0(simulation_base_folder, 'simulation_inputs_jan_17/'),
+  global_params$condition_class_raster_files = paste0(simulation_base_folder, 'prepared_data_sampled_feb_23/', 
+                                                      list.files(path = paste0(simulation_base_folder, 'prepared_data_sampled_feb_23/'),
                                                                   pattern = 'PCT_849_condition_class_', all.files = FALSE, 
                                                                   full.names = FALSE, recursive = FALSE, ignore.case = FALSE, 
-                                                                  include.dirs = FALSE, no.. = FALSE)))
+                                                                  include.dirs = FALSE, no.. = FALSE))
   
-  global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'simulation_inputs_jan_17/')
+  global_params$simulation_inputs_folder = paste0(simulation_base_folder, 'prepared_data_sampled_feb_23/')
   # How long to run the simulaton in years
   global_params$time_steps = 37 # 50
   
@@ -30,7 +28,7 @@ initialise_user_global_params <- function(folder_to_use){
   
   global_params$features_to_use_in_simulation = 1:5
   
-  global_params$store_zeros_as_sparse = TRUE
+  global_params$sparse_representation = TRUE
   
   # set to FALSE if running into memory troubles when collating
   global_params$collate_with_parallel_cores = TRUE
@@ -41,8 +39,6 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$realisation_num = 1
   
   global_params$save_simulation_outputs = TRUE
-  
-
   
   # Builds site_characteristics object. Note for Cumberland analysis always
   # want this to be FALSE as this is built in initialise_cumberland_data.R
@@ -63,7 +59,7 @@ initialise_user_global_params <- function(folder_to_use){
   global_params$overwrite_unregulated_probability_list = FALSE
   
   # always leave false for this project
-  global_params$overwrite_site_features = FALSE
+  global_params$overwrite_features = FALSE
   global_params$overwrite_condition_classes = FALSE
   
   # If building all inputs from scratch via the initialise_cumberland_data.R,
@@ -85,6 +81,9 @@ initialise_user_simulation_params_global <- function(){
   # The probability per parcel of it being unregulatedly cleared, every parcel
   # gets set to this number - set to zero to turn off. Be careful as this is
   # dependant on the total number of parcels.
+  simulation_params$use_uncoupled_offsets = TRUE
+  simulation_params$uncoupled_offset_type = 'credit' 
+  
   simulation_params$unregulated_loss_prob = 0
   
   # The total number of layers to use in the offset calcuation (iterating from the start)
@@ -164,7 +163,6 @@ initialise_user_simulation_params_global <- function(){
   # set to false to stop initial credit being transformed - this has a big impact when using the BAM metric which 
   # transforms large values to ceiling defined by 100.68
   simulation_params$transform_initial_credit = FALSE
-  
   
   #ignore offset sites with zero value
   simulation_params$screen_offset_zeros = FALSE
@@ -281,12 +279,17 @@ collate_dynamics <- function(full_dynamics_set, datasheets_to_use, set_index_to_
 }
 
 
-user_transform_function <- function(pool_vals, transform_params){
-  scaled_scores <- lapply(seq_along(pool_vals), function(i) transform_params[i]/sum(transform_params)*100.68*(1 - exp(-5*( pool_vals[[i]]/transform_params[i] )^2.5) ))
-  BAM_score <- sqrt(Reduce('+', scaled_scores[1:3]) * Reduce('+', scaled_scores[4:5]))
-  return(BAM_score)
+user_transform_function <- function(site_scores, transform_params){
+  
+  if (any(unlist(site_scores) > 0)){ 
+    scaled_scores <- lapply(seq_along(site_scores), function(i) transform_params[i]/sum(transform_params)*100.68*(1 - exp(-5*( site_scores[[i]]/transform_params[i] )^2.5) ))
+    BAM_score <- sqrt(Reduce('+', scaled_scores[1:3]) * Reduce('+', scaled_scores[4:5]))
+    return(BAM_score)
+  } else {
+    return(site_scores[[1]])
+  }
+  
 }
-
 
 setup_sub_plots <- function(nx, ny, x_space, y_space){
   par(mfrow = c(ny, nx))
@@ -306,7 +309,7 @@ initialise_user_output_params <- function(){
   # folder, otherwise you specify the path
   output_params$output_folder = vector() 
   
-  output_params$plot_type = 'outcomes' # can be 'outcomes'  or 'impacts'
+  output_params$plot_type = 'impacts' # can be 'outcomes'  or 'impacts'
   
   # use 'all' for all or therwise the numern eg 6 means the first 6 realiztaions.
   
@@ -324,7 +327,7 @@ initialise_user_output_params <- function(){
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
   
   output_params$write_pdf = TRUE
-  output_params$output_type = 'png' # set to 'raster', 'png', 'plot', or 'csv'
+  output_params$output_type = 'plot' # set to 'raster', 'png', 'plot', or 'csv'
   
   # was originally done 
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'
@@ -350,9 +353,9 @@ initialise_user_output_params <- function(){
   output_params$landscape_outcome_plot_lims_set = list(rep(list(c(0, 2e7)), 6))
   
   #set of nested lists by scenario and feature (which in this case is 5)
-  output_params$site_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5))) 
-  output_params$program_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5), c(-2e5, 2e5))) 
-  output_params$landscape_impact_plot_lims_set = list(list(c(-1e5, 1e5), c(-1e5, 1e5), c(-1e5, 1e5), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6)))
+  output_params$site_impact_plot_lims_set = list(list(c(-1e6, 1e6), c(-2e6, 2e6), c(-2e6, 2e6), c(-2e6, 2e6), c(-2e6, 2e6), c(-2e6, 2e6))) 
+  output_params$program_impact_plot_lims_set = list(list(c(-1e6, 1e6), c(-2e6, 2e6), c(-2e6, 2e6), c(-2e6, 2e6), c(-2e6, 2e6), c(-2e6, 2e6))) 
+  output_params$landscape_impact_plot_lims_set = list(list(c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6), c(-1e6, 1e6)))
   
   # write the raw condition value to file if fase, otherwise write the rescaled values as per the colour ramps below.
   output_params$map_vals = TRUE
