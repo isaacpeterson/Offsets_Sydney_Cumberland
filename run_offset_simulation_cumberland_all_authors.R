@@ -31,9 +31,9 @@ author_sheet_data = lapply(seq_along(author_names),
                                    function(i) readRDS(paste0('REVISED_Elicitation_CP_Workshop_', author_names[i], '_splines.rds'))) 
 
 #these are the actual site ids specified in the raster layer
-offset_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/prepared_data_sampled_feb_23/offset_probability_list.rds')
-development_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/prepared_data_sampled_feb_23/dev_probability_list.rds')
-site_characteristics = readRDS('~/offset_data/Sydney_Cumberland_Data/prepared_data_sampled_feb_23/site_characteristics.rds')
+offset_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/offset_probability_list.rds')
+development_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/dev_probability_list.rds')
+site_characteristics = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/site_characteristics.rds')
 
 for (i in seq_along(author_names)){
 
