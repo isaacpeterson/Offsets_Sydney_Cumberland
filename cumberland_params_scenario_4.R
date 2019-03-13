@@ -1,4 +1,5 @@
-# offsets occur over simulation in strategic area, low intensity management
+# Offsets implemented incrementally over simulation in strategic area, low
+# intensity management
 
 initialise_user_simulation_params <- function(simulation_params, simulated_time_steps, offset_probability_list, development_probability_list, site_characterstics){ 
   
