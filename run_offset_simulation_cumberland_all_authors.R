@@ -1,6 +1,6 @@
 library(offsetsim)
 
-scenario_num = 6
+scenario_num = 5
 
 source('global_scenario_params_set.R')
 user_output_params <- initialise_user_output_params()
