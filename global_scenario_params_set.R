@@ -33,7 +33,7 @@ initialise_user_global_params <- function(folder_to_use){
   # set to FALSE if running into memory troubles when collating
   global_params$collate_with_parallel_cores = TRUE
   # The number of cores to run on.
-  global_params$number_of_cores = 'all'
+  global_params$number_of_cores = 1 #'all'
   
   # The number of realizations to run
   global_params$realisation_num = 1
