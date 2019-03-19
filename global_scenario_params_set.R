@@ -33,7 +33,7 @@ initialise_user_global_params <- function(folder_to_use){
   # set to FALSE if running into memory troubles when collating
   global_params$collate_with_parallel_cores = TRUE
   # The number of cores to run on.
-  global_params$number_of_cores = 'all'
+  global_params$number_of_cores = 1 #'all'
   
   # The number of realizations to run
   global_params$realisation_num = 1
@@ -327,7 +327,7 @@ initialise_user_output_params <- function(){
   output_params$scenario_vec = 'all' #c(1,4,7,10, 8, 2,3,5,6,9,11,12 ) #1:12
   
   output_params$write_pdf = TRUE
-  output_params$output_type = 'plot' # set to 'raster', 'png', 'plot', or 'csv'
+  output_params$output_type = 'csv' # set to 'raster', 'png', 'plot', or 'csv'
   
   # was originally done 
   output_params$plot_subset_type = 'all' #c('offset_action_type') # 'offset_calc_type', 'offset_action_type', offset_time_horizon'

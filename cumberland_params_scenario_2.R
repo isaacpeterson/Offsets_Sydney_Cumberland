@@ -2,7 +2,7 @@
 
 initialise_user_simulation_params <- function(simulation_params, simulated_time_steps, offset_probability_list, development_probability_list, site_characterstics){ 
   
-  simulation_params$uncoupled_offset_selection_type = 'pre-determined'  
+  simulation_params$uncoupled_offset_selection_type = 'pre_determined'  
   simulation_params$development_selection_type = 'stochastic' 
   
   

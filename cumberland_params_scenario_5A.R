@@ -1,28 +1,23 @@
-# offsets occur at simulation initialisation, high intensity management, only implement half the offset
+# offsets occur at simulation initialisation, high intensity management, with only a randomly selected half of the offsets secured
 
-initialise_user_simulation_params <- function(simulation_params, simulated_time_steps){ 
+initialise_user_simulation_params <- function(simulation_params, simulated_time_steps, offset_probability_list, development_probability_list, site_characterstics){ 
   
-  simulation_params$use_offset_bank = TRUE
-  simulation_params$offset_bank_type = 'credit' 
-  simulation_params$banked_offset_selection_type = 'pre_determined'  
-  simulation_params$development_selection_type = 'stochastic'  
+  simulation_params$uncoupled_offset_selection_type = 'pre_determined'  
+  simulation_params$development_selection_type = 'stochastic' 
   
-  banked_offset_control = vector('list', simulated_time_steps)
-  banked_offset_control[1:simulated_time_steps] = array(0, simulated_time_steps)
-  
-  #these are the actual site ids specified in the raster layer
-  offset_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/offset_probability_list.rds')
-  site_characteristics = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/site_characteristics.rds')
-  banked_offset_sites_to_use = site_characteristics$site_IDs[which(unlist(offset_probability_list) > 0)]
-  
-  # only implement half the parcels as offsets, so replace banked_offset_sites_to_use with a random sample of half the length
-  number_to_sample = round(length(banked_offset_sites_to_use)*0.5)
-  banked_offset_sites_to_use = sample(banked_offset_sites_to_use, number_to_sample, replace = FALSE )
+  offset_sites_to_use = site_characteristics$site_IDs[which(unlist(offset_probability_list) > 0)]
 
-  banked_offset_control[[1]] = banked_offset_sites_to_use
-  simulation_params$banked_offset_control = list(banked_offset_control)
+  # set this to be only half the number of offsets
+  number_to_sample = round(length(offset_sites_to_use)*0.5)
+  offset_sites_to_use = sample(offset_sites_to_use, number_to_sample, replace = FALSE )
 
-  development_probability_list = readRDS('~/offset_data/Sydney_Cumberland_Data/simulation_inputs_jan_17/dev_probability_list.rds')
+  
+  uncoupled_offset_control = vector('list', simulated_time_steps)
+  uncoupled_offset_control[1:simulated_time_steps] = array(0, simulated_time_steps)
+  
+  uncoupled_offset_control[[1]] = offset_sites_to_use
+  simulation_params$uncoupled_offset_control = list(uncoupled_offset_control)
+
   dev_num = length(which(unlist(development_probability_list) > 0))
   
   simulation_params$development_control = list(build_stochastic_intervention(simulated_time_steps, 
